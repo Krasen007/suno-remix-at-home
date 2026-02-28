@@ -105,11 +105,17 @@
         </div>
         <div class="form-group">
           <label>Audio URL (GitHub Raw)</label>
-          <input
-            type="url"
-            class="track-url"
-            placeholder="https://raw.githubusercontent.com/..."
-          />
+          <div class="input-with-button">
+            <input
+              type="url"
+              class="track-url"
+              placeholder="https://raw.githubusercontent.com/..."
+            />
+            <button class="btn btn-secondary btn-sm upload-btn" title="Upload to GitHub">
+              📤 Upload
+            </button>
+            <input type="file" class="file-input hidden" accept="audio/*" />
+          </div>
         </div>
         <div class="form-group">
           <label>Style</label>

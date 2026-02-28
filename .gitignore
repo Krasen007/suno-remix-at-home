@@ -1,5 +1,6 @@
 .opencode
 remixes/
+uploads/
 history.json
 # Byte-compiled / optimized / DLL files
 __pycache__/

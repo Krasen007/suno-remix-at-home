@@ -133,6 +133,48 @@ function renderTracks() {
       }
     });
 
+    // Handle GitHub Upload
+    const uploadBtn = card.querySelector(".upload-btn");
+    const fileInput = card.querySelector(".file-input");
+    const urlInput = card.querySelector(".track-url");
+
+    uploadBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = "Uploading...";
+      addLog(`Uploading ${file.name} to GitHub...`, "info");
+
+      try {
+        const res = await fetch("/api/upload-to-github", {
+          method: "POST",
+          headers: {
+            "X-Filename": file.name,
+            "Content-Type": "application/octet-stream"
+          },
+          body: file
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          addLog(`Uploaded! Raw URL: ${data.url}`, "success");
+          updateTrack(track.id, "url", data.url);
+          urlInput.value = data.url;
+        } else {
+          addLog(`Upload failed: ${data.message}`, "error");
+        }
+      } catch (err) {
+        addLog(`Upload error: ${err.message}`, "error");
+      } finally {
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = "📤 Upload";
+        fileInput.value = "";
+      }
+    });
+
     card
       .querySelector(".remove-track")
       .addEventListener("click", () => removeTrack(track.id));
@@ -305,7 +347,7 @@ function startRemix() {
         reader.read().then(({ done, value }) => {
           if (done) {
             // Process any remaining partial line
-            if (sseBuffer) {
+            if (sseBuffer && sseBuffer.startsWith("data: ")) {
                processLine(sseBuffer);
             }
             state.isRunning = false;

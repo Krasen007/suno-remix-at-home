@@ -37,9 +37,20 @@ SUNO_API_KEY=your_key_here
 
 ### 3. Audio Preparation
 
-The Suno API requires a public URL to download your source audio.
+The Suno API requires a public URL to download your source audio. You have two ways to provide this:
 
-1.  Upload your MP3 to a public GitHub repo.
+#### Option A: Dashboard Upload (Recommended)
+
+Go to GitHub Settings > Developer Settings > Personal Access Tokens (Tokens classic) and generate a token with the repo scope.
+
+1.  Configure your GitHub details in `.env` (`GITHUB_TOKEN`, `GITHUB_OWNER`, etc.).
+2.  In the Web Dashboard, click the **"📤 Upload"** button next to the Audio URL field.
+3.  Select your local MP3/WAV file.
+4.  The server will automatically host it on GitHub and fill in the URL for you.
+
+#### Option B: Manual GitHub Hosting
+
+1.  Upload your MP3 to a public GitHub repo manually.
 2.  Click the file, then click **"Raw"**.
 3.  Copy the URL (it should look like `https://raw.githubusercontent.com/...`).
 
