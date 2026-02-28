@@ -9,7 +9,7 @@ import json
 import os
 import sys
 
-SUNO_API_KEY = "YOUR_API_KEY_HERE"
+SUNO_API_KEY = os.getenv("SUNO_API_KEY", "YOUR_API_KEY_HERE")
 BASE_URL = "https://api.sunoapi.org/api/v1"
 
 TRACKS = [
