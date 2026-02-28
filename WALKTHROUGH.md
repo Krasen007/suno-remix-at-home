@@ -25,20 +25,30 @@ pip install -r requirements.txt
 
 1. Go to [sunoapi.org](https://sunoapi.org)
 2. Get an API key from your dashboard
+3. Set up environment variables:
+   ```bash
+   # Copy the example file
+   cp .env.example .env
+   # Edit .env with your API key
+   ```
 
-### 3. Host Your MP3 on GitHub
+### 3. Check Your Credits
+
+The script automatically checks your remaining credits before starting. Remix jobs require multiple credits - top up at [sunoapi.org](https://sunoapi.org) if needed.
+
+### 4. Host Your MP3 on GitHub
 
 1. Create a public GitHub repo
 2. Add your MP3 file
 3. Click "Raw" to get the URL
 4. Example: `https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/song.mp3`
 
-### 4. Configure the Script
+### 5. Configure the Script
 
 Open `remix.py` and edit:
 
 ```python
-SUNO_API_KEY = "your-api-key-here"
+SUNO_API_KEY = os.getenv("SUNO_API_KEY", "your-api-key-here")
 
 TRACKS = [
     {
@@ -50,7 +60,7 @@ TRACKS = [
 ]
 ```
 
-### 5. Run It
+### 6. Run It
 
 Make sure your virtual environment is activated (you should see `(.venv)` in your terminal), then:
 
@@ -92,6 +102,14 @@ After running, you'll get:
 | 429 | No credits | Buy more credits |
 | 451 | Can't download audio | Make GitHub repo PUBLIC |
 | 500 | Server error | Retry after 30s |
+
+## Credits System
+
+The script automatically checks your remaining credits before starting:
+- **Endpoint**: `/generate/credit` 
+- **Response**: Shows exact credit balance
+- **Requirement**: Remix jobs need multiple credits
+- **Action**: Top up at [sunoapi.org](https://sunoapi.org) if insufficient
 
 ## Important Notes
 

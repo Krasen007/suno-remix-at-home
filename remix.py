@@ -9,15 +9,15 @@ import json
 import os
 import sys
 
-SUNO_API_KEY = os.getenv("SUNO_API_KEY", "YOUR_API_KEY_HERE")
+SUNO_API_KEY = os.getenv("SUNO_API_KEY")
 BASE_URL = "https://api.sunoapi.org/api/v1"
 
 TRACKS = [
     {
-        "uploadUrl": "https://raw.githubusercontent.com/YOU/REPO/main/song1.mp3",
-        "title": "Song 1 (Remix)",
-        "style": "Electronic, Synth Pop",
-        "prompt": "Transform into an upbeat electronic remix",
+        "uploadUrl": "https://github.com/Krasen007/suno-remix-at-home/raw/refs/heads/master/song%20uploads/fairytale%20solo.wav",
+        "title": "Fairytale Solo From API",
+        "style": "guitar, epic solo",
+        "prompt": "Transform into an epic guitar solo with delay and effects",
     },
 ]
 
@@ -33,7 +33,8 @@ TIMEOUT_SECONDS = 600
 def check_credits():
     """Check remaining Suno API credits."""
     print(f"[API] Checking credits...")
-    response = requests.get(f"{BASE_URL}/get-credits", headers=HEADERS)
+    
+    response = requests.get(f"{BASE_URL}/generate/credit", headers=HEADERS)
     
     if response.status_code == 401:
         raise Exception("API error 401: Invalid API key. Check SUNO_API_KEY.")
@@ -43,7 +44,7 @@ def check_credits():
     if data.get("code") != 200:
         raise Exception(f"API error: {data.get('msg', 'Unknown error')}")
     
-    credits = data["data"]["credits"]
+    credits = data["data"]
     print(f"[API] Remaining credits: {credits}")
     return credits
 
@@ -118,7 +119,8 @@ def poll_for_completion(task_id):
         print(f"[POLL] Status: {status}")
         
         if status == "SUCCESS":
-            tracks = data["data"]["response"]["data"]
+            print(f"[DEBUG] Success response: {json.dumps(data, indent=2)}")
+            tracks = data["data"]["response"]["sunoData"]
             return tracks, None
         elif status == "FAILED":
             error_msg = data.get("data", {}).get("errorMessage", "Unknown error")
@@ -159,8 +161,9 @@ def main():
     """Main entry point."""
     print("=== Suno Remix Script ===\n")
     
-    if SUNO_API_KEY == "YOUR_API_KEY_HERE":
-        print("ERROR: Please set SUNO_API_KEY in remix.py")
+    if not SUNO_API_KEY:
+        print("ERROR: Please set SUNO_API_KEY environment variable")
+        print("Create a .env file with your API key or set it in your shell")
         sys.exit(1)
     
     try:
@@ -189,12 +192,12 @@ def main():
             for v in variants:
                 print(f"  - {v['title']}")
                 print(f"    Duration: {v.get('duration', 'N/A')}s")
-                print(f"    URL: {v['audio_url']}")
+                print(f"    URL: {v['audioUrl']}")
             
             if variants:
                 for idx, v in enumerate(variants):
                     filename = f"{track['title']}_v{idx+1}"
-                    download_remix(v['audio_url'], filename)
+                    download_remix(v['audioUrl'], filename)
             
             all_results[track["title"]] = variants
             
