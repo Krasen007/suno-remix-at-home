@@ -188,6 +188,15 @@ function addResult(result) {
     clone.querySelector(".res-dur").textContent = v.duration || "--";
     clone.querySelector(".res-audio").src = v.audioUrl;
     clone.querySelector(".res-link").href = v.audioUrl;
+
+    // Display cover art
+    const img = clone.querySelector(".res-image");
+    const imageUrl = v.imageUrl || (result.images && result.images[i]) || (result.images && result.images[0]);
+    if (imageUrl) {
+      img.src = imageUrl;
+      img.classList.remove("hidden");
+    }
+
     resultsGrid.appendChild(clone);
   });
 }

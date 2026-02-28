@@ -145,14 +145,17 @@ class RemixHandler(BaseHTTPRequestHandler):
                     self._send_sse('log', {'message': f"Status: {status}", 'level': 'poll'})
                     
                     if status == "SUCCESS":
-                        variants = poll_data["data"]["response"]["sunoData"]
+                        data_root = poll_data.get("data", {})
+                        variants = data_root.get("response", {}).get("sunoData", [])
+                        images = data_root.get("images", [])
+                        
                         for idx, v in enumerate(variants):
                             fname = f"{track['title']}_v{idx+1}"
                             path = download_audio(v['audioUrl'], fname)
                             if path:
                                 self._send_sse('log', {'message': f"Saved: {path}", 'level': 'success'})
                         
-                        self._send_sse('result', {'title': track['title'], 'variants': variants})
+                        self._send_sse('result', {'title': track['title'], 'variants': variants, 'images': images})
                         break
                     elif status == "FAILED":
                         err = poll_data.get("data", {}).get("errorMessage", "Unknown failure")
