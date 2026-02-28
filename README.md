@@ -8,7 +8,15 @@ The recommended way to use Suno Remix is through the integrated dashboard.
 
 ```bash
 # 1. Set up and Activate virtual environment
+python -m venv .venv
+
+# Windows (PowerShell)
 .venv\Scripts\Activate.ps1
+# Windows (CMD)
+.venv\Scripts\activate.bat
+# macOS/Linux
+source .venv/bin/activate
+
 pip install -r requirements.txt
 
 # 2. Set your API key

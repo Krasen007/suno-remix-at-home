@@ -6,8 +6,19 @@ import os
 import urllib.parse
 from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
+import threading
+import logging
 
-# Simple .env loader
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# Constants
+POLL_INTERVAL = 30
+TIMEOUT_SECONDS = 600
+REQUEST_TIMEOUT = 10
+MAX_BODY_SIZE = 1024 * 512  # 512KB
+HISTORY_FILE = "history.json"
+HISTORY_LOCK = threading.Lock()
 def load_env():
     if os.path.exists(".env"):
         with open(".env", "r") as f:
@@ -32,15 +43,19 @@ def get_credits_data():
     if not SUNO_API_KEY:
         return None, "SUNO_API_KEY not set"
     try:
-        response = requests.get(f"{BASE_URL}/generate/credit", headers=HEADERS)
+        response = requests.get(f"{BASE_URL}/generate/credit", headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
         data = response.json()
         if data.get("code") == 200:
             return data["data"], None
         return None, data.get("msg", "Unknown error")
-    except Exception as e:
-        return None, str(e)
+    except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
+        logger.error(f"Credit check failed: {e}")
+        return None, f"Request failed: {str(e)}"
 
 def submit_track(track):
+    if not SUNO_API_KEY:
+        return None, "SUNO_API_KEY not set"
     payload = {
         "uploadUrl": track["uploadUrl"],
         "customMode": track.get("customMode", True),
@@ -50,41 +65,62 @@ def submit_track(track):
         "title": track["title"],
         "prompt": track["prompt"],
     }
-    response = requests.post(f"{BASE_URL}/generate/upload-cover", headers=HEADERS, json=payload)
-    data = response.json()
-    if data.get("code") == 200:
-        return data["data"]["taskId"], None
-    return None, data.get("msg", "Submit failed")
+    try:
+        response = requests.post(f"{BASE_URL}/generate/upload-cover", headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
+        response.raise_for_status()
+        data = response.json()
+        if data.get("code") == 200:
+            return data["data"]["taskId"], None
+        return None, data.get("msg", "Submit failed")
+    except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
+        logger.error(f"Submit failed: {e}")
+        return None, f"Request failed: {str(e)}"
 
 def download_audio(url, filename):
     os.makedirs("remixes", exist_ok=True)
+    # Sanitize filename
+    safe_name = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_")).strip()
+    if not safe_name: safe_name = "remix"
+    
+    local_path = os.path.normpath(os.path.join("remixes", f"{safe_name}.mp3"))
+    base_dir = os.path.realpath("remixes")
+    if not os.path.realpath(local_path).startswith(base_dir):
+        logger.error("Attempted path traversal in download_audio")
+        return None, None
+
     try:
-        res = requests.get(url)
-        if res.status_code == 200:
-            path = f"remixes/{filename}.mp3"
-            with open(path, "wb") as f:
-                f.write(res.content)
-            return path, f"/remixes/{filename}.mp3"
-    except:
-        pass
+        res = requests.get(url, timeout=REQUEST_TIMEOUT)
+        res.raise_for_status()
+        with open(local_path, "wb") as f:
+            f.write(res.content)
+        return local_path, f"/remixes/{urllib.parse.quote(safe_name)}.mp3"
+    except (requests.exceptions.RequestException, OSError) as e:
+        logger.error(f"Download failed for {url}: {e}")
     return None, None
 
 def save_to_history(result):
-    history_file = "history.json"
-    history = []
-    if os.path.exists(history_file):
+    with HISTORY_LOCK:
+        history = []
+        if os.path.exists(HISTORY_FILE):
+            try:
+                with open(HISTORY_FILE, "r") as f:
+                    history = json.load(f)
+            except (json.JSONDecodeError, OSError) as e:
+                logger.error(f"History load failed: {e}")
+                history = []
+        
+        result["timestamp"] = time.time()
+        history.insert(0, result)
+        
+        # Atomic write
+        temp_file = f"{HISTORY_FILE}.tmp"
         try:
-            with open(history_file, "r") as f:
-                history = json.load(f)
-        except:
-            history = []
-    
-    # Add timestamp
-    result["timestamp"] = time.time()
-    history.insert(0, result) # Newest first
-    
-    with open(history_file, "w") as f:
-        json.dump(history, f, indent=2)
+            with open(temp_file, "w") as f:
+                json.dump(history, f, indent=2)
+            os.replace(temp_file, HISTORY_FILE)
+        except OSError as e:
+            logger.error(f"History save failed: {e}")
+            if os.path.exists(temp_file): os.remove(temp_file)
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     pass
@@ -121,11 +157,16 @@ class RemixHandler(BaseHTTPRequestHandler):
             return
 
         if decoded_path == '/api/history':
-            history_file = "history.json"
-            history = []
-            if os.path.exists(history_file):
-                with open(history_file, "r") as f:
-                    history = json.load(f)
+            with HISTORY_LOCK:
+                history = []
+                if os.path.exists(HISTORY_FILE):
+                    try:
+                        with open(HISTORY_FILE, "r") as f:
+                            history = json.load(f)
+                    except (json.JSONDecodeError, OSError) as e:
+                        logger.error(f"API History load failed: {e}")
+                        history = []
+            
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
@@ -134,11 +175,16 @@ class RemixHandler(BaseHTTPRequestHandler):
 
         # Serve static files from 'www' or 'remixes'
         if decoded_path.startswith('/remixes/'):
-            full_path = decoded_path.lstrip('/')
+            base_dir = os.path.realpath('remixes')
+            relative_path = decoded_path[len('/remixes/'):]
         else:
-            full_path = os.path.join('www', decoded_path.lstrip('/'))
-
-        if os.path.exists(full_path) and not os.path.isdir(full_path):
+            base_dir = os.path.realpath('www')
+            relative_path = decoded_path.lstrip('/')
+            
+        normalized_path = os.path.normpath(relative_path.lstrip('/\\'))
+        full_path = os.path.realpath(os.path.join(base_dir, normalized_path))
+        
+        if full_path.startswith(base_dir) and os.path.exists(full_path) and not os.path.isdir(full_path):
             self.send_response(200)
             if full_path.endswith(".html"): self.send_header('Content-Type', 'text/html')
             elif full_path.endswith(".css"): self.send_header('Content-Type', 'text/css')
@@ -154,9 +200,27 @@ class RemixHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         if self.path == '/api/remix':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            tracks = json.loads(post_data).get("tracks", [])
+            content_length = self.headers.get('Content-Length')
+            if not content_length:
+                self.send_error(411, "Length Required")
+                return
+            
+            try:
+                content_length = int(content_length)
+            except ValueError:
+                self.send_error(400, "Invalid Content-Length")
+                return
+                
+            if content_length > MAX_BODY_SIZE:
+                self.send_error(413, "Request Entity Too Large")
+                return
+                
+            try:
+                post_data = self.rfile.read(content_length)
+                tracks = json.loads(post_data).get("tracks", [])
+            except (json.JSONDecodeError, UnicodeDecodeError):
+                self.send_error(400, "Invalid JSON")
+                return
 
             self.send_response(200)
             self.send_header('Content-Type', 'text/event-stream')
@@ -176,8 +240,15 @@ class RemixHandler(BaseHTTPRequestHandler):
                 
                 deadline = time.time() + TIMEOUT_SECONDS
                 while time.time() < deadline:
-                    poll = requests.get(f"{BASE_URL}/generate/record-info", params={"taskId": task_id}, headers=HEADERS)
-                    poll_data = poll.json()
+                    try:
+                        poll = requests.get(f"{BASE_URL}/generate/record-info", params={"taskId": task_id}, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+                        poll.raise_for_status()
+                        poll_data = poll.json()
+                    except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
+                        logger.error(f"Poll fail for {task_id}: {e}")
+                        time.sleep(POLL_INTERVAL)
+                        continue
+                        
                     status = poll_data.get("data", {}).get("status", "UNKNOWN")
                     
                     self._send_sse('log', {'message': f"Status: {status}", 'level': 'poll'})

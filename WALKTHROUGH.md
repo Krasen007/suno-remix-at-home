@@ -28,6 +28,13 @@ Obtain your key from [sunoapi.org](https://sunoapi.org) and add it to your `.env
 SUNO_API_KEY=your_key_here
 ```
 
+> [!CAUTION]
+> **SECURITY WARNING**: Your `.env` file contains sensitive API keys and **MUST NEVER** be committed to version control (Git).
+>
+> - Ensure `.env` is listed in your `.gitignore`.
+> - If you accidentally expose your key, rotate/regenerate it immediately on [sunoapi.org](https://sunoapi.org).
+> - For production environments, use a secure secret manager.
+
 ### 3. Audio Preparation
 
 The Suno API requires a public URL to download your source audio.

@@ -1,6 +1,6 @@
 // State Management
 let state = {
-  tracks: JSON.parse(localStorage.getItem("suno-tracks")) || [
+  tracks: [
     {
       id: Date.now(),
       title: "",
@@ -14,6 +14,15 @@ let state = {
   isRunning: false,
   credits: null,
 };
+
+try {
+  const saved = localStorage.getItem("suno-tracks");
+  if (saved) {
+    state.tracks = JSON.parse(saved);
+  }
+} catch (e) {
+  console.error("Failed to parse saved tracks", e);
+}
 
 // DOM Elements
 const tracksContainer = document.getElementById("tracks-container");
@@ -90,41 +99,39 @@ function renderTracks() {
 
     card.querySelector(".track-index").textContent = `#${index + 1}`;
 
-    const titleInput = card.querySelector(".track-title");
-    titleInput.value = track.title;
-    titleInput.addEventListener("input", (e) =>
-      updateTrack(track.id, "title", e.target.value),
-    );
+    const fields = [
+      { class: ".track-title", field: "title" },
+      { class: ".track-url", field: "url" },
+      { class: ".track-style", field: "style" },
+      { class: ".track-prompt", field: "prompt" },
+      { class: ".track-custom", field: "customMode", type: "checkbox" },
+      { class: ".track-instrumental", field: "instrumental", type: "checkbox" },
+    ];
 
-    const urlInput = card.querySelector(".track-url");
-    urlInput.value = track.url || track.uploadUrl || ""; // Support both schemas
-    urlInput.addEventListener("input", (e) =>
-      updateTrack(track.id, "url", e.target.value),
-    );
+    fields.forEach((f) => {
+      const input = card.querySelector(f.class);
+      const label = input.closest(".form-group")?.querySelector("label") || 
+                    input.closest(".checkbox-label");
+      const uniqueId = `track-${track.id}-${f.field}`;
+      
+      input.id = uniqueId;
+      if (label) {
+        if (label.tagName === "LABEL") label.setAttribute("for", uniqueId);
+        else label.for = uniqueId; // for checkbox-label spans or similar
+      }
 
-    const styleInput = card.querySelector(".track-style");
-    styleInput.value = track.style;
-    styleInput.addEventListener("input", (e) =>
-      updateTrack(track.id, "style", e.target.value),
-    );
-
-    const promptInput = card.querySelector(".track-prompt");
-    promptInput.value = track.prompt;
-    promptInput.addEventListener("input", (e) =>
-      updateTrack(track.id, "prompt", e.target.value),
-    );
-
-    const customToggle = card.querySelector(".track-custom");
-    customToggle.checked = track.customMode;
-    customToggle.addEventListener("change", (e) =>
-      updateTrack(track.id, "customMode", e.target.checked),
-    );
-
-    const instrumentalToggle = card.querySelector(".track-instrumental");
-    instrumentalToggle.checked = track.instrumental;
-    instrumentalToggle.addEventListener("change", (e) =>
-      updateTrack(track.id, "instrumental", e.target.checked),
-    );
+      if (f.type === "checkbox") {
+        input.checked = track[f.field];
+        input.addEventListener("change", (e) =>
+          updateTrack(track.id, f.field, e.target.checked),
+        );
+      } else {
+        input.value = track[f.field] || (f.field === "url" ? track.uploadUrl : "") || "";
+        input.addEventListener("input", (e) =>
+          updateTrack(track.id, f.field, e.target.value),
+        );
+      }
+    });
 
     card
       .querySelector(".remove-track")
@@ -138,15 +145,22 @@ function renderTracks() {
 async function refreshCredits() {
   try {
     const res = await fetch("/api/credits");
+    if (!res.ok) {
+      const errText = await res.text();
+      addLog(`Credits error (${res.status}): ${errText}`, "error");
+      return;
+    }
     const data = await res.json();
     if (data.success) {
       state.credits = data.credits;
       creditsBadge.textContent = `Credits: ${data.credits}`;
       creditsBadge.style.color =
         data.credits > 0 ? "var(--primary)" : "var(--danger)";
+    } else {
+      addLog(`Failed to fetch credits: ${data.message}`, "error");
     }
   } catch (e) {
-    addLog("Failed to fetch credits. Is server running?", "error");
+    addLog("Network error fetching credits. Is server running?", "error");
   }
 }
 
@@ -156,6 +170,9 @@ async function checkServer() {
     if (res.ok) {
       serverStatus.textContent = "Server: Connected";
       serverStatus.style.color = "var(--primary)";
+    } else {
+      serverStatus.textContent = `Server: Error (${res.status})`;
+      serverStatus.style.color = "var(--danger)";
     }
   } catch (e) {
     serverStatus.textContent = "Server: Offline";
@@ -166,6 +183,11 @@ async function checkServer() {
 async function loadHistory() {
   try {
     const res = await fetch("/api/history");
+    if (!res.ok) {
+      addLog(`History error (${res.status})`, "error");
+      historyGrid.innerHTML = '<div class="empty-state">Unable to load history.</div>';
+      return;
+    }
     const history = await res.json();
     historyGrid.innerHTML = "";
     if (history.length === 0) {
@@ -175,6 +197,7 @@ async function loadHistory() {
     }
   } catch (e) {
     console.error("Failed to load history", e);
+    historyGrid.innerHTML = '<div class="empty-state">Network error loading history.</div>';
   }
 }
 
@@ -258,36 +281,45 @@ function startRemix() {
     .then((response) => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let sseBuffer = "";
+
+      function processLine(line) {
+        if (line.startsWith("data: ")) {
+          try {
+            const data = JSON.parse(line.substring(6));
+            if (data.type === "log") {
+              addLog(data.message, data.level);
+            } else if (data.type === "result") {
+              addResult(data);
+            } else if (data.type === "done") {
+              addLog("Remix session complete!", "success");
+              refreshCredits();
+            }
+          } catch (e) {
+            // Skip non-json lines
+          }
+        }
+      }
 
       function readChunk() {
         reader.read().then(({ done, value }) => {
           if (done) {
+            // Process any remaining partial line
+            if (sseBuffer) {
+               processLine(sseBuffer);
+            }
             state.isRunning = false;
             updateUIForRunning(false);
             return;
           }
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
+          sseBuffer += decoder.decode(value, { stream: true });
+          const lines = sseBuffer.split("\n");
+          
+          // Keep the last segment in buffer (it might be incomplete)
+          sseBuffer = lines.pop();
 
-          lines.forEach((line) => {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.substring(6));
-                if (data.type === "log") {
-                  addLog(data.message, data.level);
-                } else if (data.type === "result") {
-                  addResult(data);
-                } else if (data.type === "done") {
-                  addLog("Remix session complete!", "success");
-                  refreshCredits();
-                }
-              } catch (e) {
-                // Skip non-json lines
-              }
-            }
-          });
-
+          lines.forEach(processLine);
           readChunk();
         });
       }
@@ -315,4 +347,8 @@ function updateUIForRunning(running) {
 }
 
 // Run App
-init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
