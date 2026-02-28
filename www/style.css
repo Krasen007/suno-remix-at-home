@@ -253,6 +253,20 @@ textarea { min-height: 80px; resize: vertical; }
 
 .btn-lg { width: 100%; padding: 1.2rem; font-size: 1.1rem; margin-top: 1rem; }
 
+.btn-danger {
+    background: #450a0a;
+    color: var(--danger);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.btn-danger:hover { background: var(--danger); color: white; }
+
+.result-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.result-actions .res-link { flex: 1; }
+
 /* Console */
 .console-wrapper {
     background: var(--bg-console);

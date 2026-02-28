@@ -198,7 +198,84 @@ class RemixHandler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
         self.end_headers()
+
+    def do_DELETE(self):
+        decoded_path = urllib.parse.unquote(self.path)
+        if decoded_path.startswith('/api/history/'):
+            parts = decoded_path.rstrip('/').split('/')
+            # Expected: ['', 'api', 'history', 'timestamp', 'variant_id']
+            if len(parts) < 4:
+                self.send_error(400, "Missing timestamp")
+                return
+            
+            try:
+                timestamp_to_target = float(parts[3])
+                variant_id = parts[4] if len(parts) > 4 else None
+            except ValueError:
+                self.send_error(400, "Invalid timestamp")
+                return
+
+            with HISTORY_LOCK:
+                if os.path.exists(HISTORY_FILE):
+                    try:
+                        with open(HISTORY_FILE, "r") as f:
+                            history = json.load(f)
+                        
+                        def delete_variant_file(v):
+                            local_url = v.get("localUrl")
+                            if local_url and local_url.startswith("/remixes/"):
+                                try:
+                                    fname = urllib.parse.unquote(local_url[len("/remixes/"):])
+                                    fpath = os.path.realpath(os.path.join("remixes", fname))
+                                    if fpath.startswith(os.path.realpath("remixes")) and os.path.exists(fpath):
+                                        os.remove(fpath)
+                                        logger.info(f"Deleted local file: {fpath}")
+                                except Exception as e:
+                                    logger.error(f"Failed to delete local file for {local_url}: {e}")
+
+                        initial_history_len = len(history)
+                        new_history = []
+                        
+                        for item in history:
+                            if abs(item.get("timestamp", 0) - timestamp_to_target) < 0.001:
+                                if variant_id:
+                                    # Target specific variant
+                                    variants_to_keep = []
+                                    for v in item.get("variants", []):
+                                        if v.get("id") == variant_id:
+                                            delete_variant_file(v)
+                                        else:
+                                            variants_to_keep.append(v)
+                                    item["variants"] = variants_to_keep
+                                    # Only keep the group if variants remain
+                                    if item["variants"]:
+                                        new_history.append(item)
+                                else:
+                                    # Delete entire group: delete all its local files
+                                    for v in item.get("variants", []):
+                                        delete_variant_file(v)
+                            else:
+                                new_history.append(item)
+                        
+                        # Save updated history
+                        temp_file = f"{HISTORY_FILE}.tmp"
+                        with open(temp_file, "w") as f:
+                            json.dump(new_history, f, indent=2)
+                        os.replace(temp_file, HISTORY_FILE)
+                        
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/json')
+                        self.end_headers()
+                        self.wfile.write(json.dumps({"success": True}).encode())
+                    except (json.JSONDecodeError, OSError) as e:
+                        logger.error(f"Failed to delete from history: {e}")
+                        self.send_error(500, "Internal Server Error")
+                else:
+                    self.send_error(404, "History file not found")
+            return
+        self.send_error(404)
 
     def do_GET(self):
         decoded_path = urllib.parse.unquote(self.path)

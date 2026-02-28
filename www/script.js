@@ -292,8 +292,32 @@ function addResult(result, container = resultsGrid) {
       img.classList.remove("hidden");
     }
 
+    // Handle Deletion (History Only)
+    if (container === historyGrid) {
+      const delBtn = clone.querySelector(".res-delete");
+      delBtn.classList.remove("hidden");
+      delBtn.addEventListener("click", () => deleteHistoryItem(result.timestamp, v.id));
+    }
+
     container.appendChild(clone);
   });
+}
+
+async function deleteHistoryItem(timestamp, variantId) {
+  if (!confirm("Are you sure you want to delete this specific variant?")) return;
+
+  try {
+    const url = `/api/history/${timestamp}${variantId ? '/' + variantId : ''}`;
+    const res = await fetch(url, { method: "DELETE" });
+    if (res.ok) {
+      addLog("Item deleted from history.", "info");
+      loadHistory();
+    } else {
+      addLog("Failed to delete item.", "error");
+    }
+  } catch (e) {
+    addLog("Network error deleting item.", "error");
+  }
 }
 
 function startRemix() {
