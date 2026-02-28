@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Suno Remix | AI Music Engine</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <header>
+        <div class="logo">
+          <span class="icon">🎵</span>
+          <h1>Suno<span>Remix</span></h1>
+        </div>
+        <div class="status-bar">
+          <div id="credits-badge" class="badge">Credits: --</div>
+          <button id="refresh-credits" class="btn-icon" title="Refresh Credits">
+            🔄
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="config-section">
+          <div class="section-header">
+            <h2>Configuration</h2>
+            <button id="add-track" class="btn btn-secondary">
+              + Add Track
+            </button>
+          </div>
+
+          <div id="tracks-container" class="tracks-list">
+            <!-- Tracks will be injected here -->
+          </div>
+
+          <div class="actions">
+            <button id="run-btn" class="btn btn-primary btn-lg">
+              <span class="btn-text">Start Remixing</span>
+              <div class="loader-dots hidden">
+                <span></span><span></span><span></span>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <section class="output-section">
+          <div class="console-wrapper">
+            <div class="console-header">
+              <span>Terminal Output</span>
+              <button id="clear-logs" class="btn-text-only">Clear</button>
+            </div>
+            <div id="console-output" class="console">
+              <div class="log info">
+                Ready to remix. Add your GitHub raw audio URLs and styles.
+              </div>
+            </div>
+          </div>
+
+          <div class="results-wrapper">
+            <h3>Remix Variants</h3>
+            <div id="results-grid" class="results-grid">
+              <div class="empty-state">
+                No results yet. Start a remix session to see variants.
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer>
+        <p>
+          Suno Remix At Home &bull; Powered by Suno API &bull;
+          <span id="server-status">Server: Checking...</span>
+        </p>
+      </footer>
+    </div>
+
+    <!-- Templates -->
+    <template id="track-template">
+      <div class="track-card">
+        <div class="track-header">
+          <span class="track-index">#1</span>
+          <button class="remove-track">✕</button>
+        </div>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" class="track-title" placeholder="My Epic Remix" />
+        </div>
+        <div class="form-group">
+          <label>Audio URL (GitHub Raw)</label>
+          <input
+            type="url"
+            class="track-url"
+            placeholder="https://raw.githubusercontent.com/..."
+          />
+        </div>
+        <div class="form-group">
+          <label>Style</label>
+          <input
+            type="text"
+            class="track-style"
+            placeholder="Electronic, Synthwave, Fast"
+          />
+        </div>
+        <div class="form-group">
+          <label>Lyrics</label>
+          <textarea
+            class="track-prompt"
+            placeholder="Transform this into a high-energy dance track... / [Instrumental]"
+          ></textarea>
+        </div>
+        <div class="form-group row">
+          <label class="checkbox-label">
+            <input type="checkbox" class="track-custom" checked />
+            <span>Custom Mode</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" class="track-instrumental" />
+            <span>Instrumental</span>
+          </label>
+        </div>
+      </div>
+    </template>
+
+    <template id="result-template">
+      <div class="result-card">
+        <div class="result-info">
+          <h4 class="res-title">Title</h4>
+          <p class="res-meta">Duration: <span class="res-dur">--</span>s</p>
+        </div>
+        <audio controls class="res-audio"></audio>
+        <a href="#" target="_blank" class="btn btn-sm btn-accent res-link"
+          >Download</a
+        >
+      </div>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
