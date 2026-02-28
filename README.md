@@ -2,6 +2,8 @@
 
 A powerful tool to remix your MP3 files using Suno's AI API. Now featuring a modern web interface for easier configuration and persistent local history.
 
+![Suno Remix Dashboard](preview.png)
+
 ## 🚀 Web Interface Quick Start
 
 The recommended way to use Suno Remix is through the integrated dashboard.
