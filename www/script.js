@@ -18,10 +18,13 @@ let state = {
 try {
   const saved = localStorage.getItem("suno-tracks");
   if (saved) {
-    state.tracks = JSON.parse(saved);
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed)) {
+      state.tracks = parsed.filter(t => t && typeof t === 'object' && t.id && t.title !== undefined);
+    }
   }
 } catch (e) {
-  console.error("Failed to parse saved tracks", e);
+  console.warn("Failed to parse saved tracks, falling back to default", e);
 }
 
 // DOM Elements
@@ -115,9 +118,8 @@ function renderTracks() {
       const uniqueId = `track-${track.id}-${f.field}`;
       
       input.id = uniqueId;
-      if (label) {
-        if (label.tagName === "LABEL") label.setAttribute("for", uniqueId);
-        else label.for = uniqueId; // for checkbox-label spans or similar
+      if (label && label.tagName === "LABEL") {
+        label.setAttribute("for", uniqueId);
       }
 
       if (f.type === "checkbox") {
@@ -126,7 +128,7 @@ function renderTracks() {
           updateTrack(track.id, f.field, e.target.checked),
         );
       } else {
-        input.value = track[f.field] || (f.field === "url" ? track.uploadUrl : "") || "";
+        input.value = track[f.field] || (f.field === "url" ? track.url : "") || "";
         input.addEventListener("input", (e) =>
           updateTrack(track.id, f.field, e.target.value),
         );
@@ -152,11 +154,18 @@ function renderTracks() {
         const res = await fetch("/api/upload-to-github", {
           method: "POST",
           headers: {
-            "X-Filename": file.name,
+            "X-Filename": encodeURIComponent(file.name),
             "Content-Type": "application/octet-stream"
           },
           body: file
         });
+
+        if (!res.ok) {
+           const errText = await res.text();
+           let msg = `Error ${res.status}`;
+           try { msg = JSON.parse(errText).message || msg; } catch(e) {}
+           throw new Error(msg);
+        }
 
         const data = await res.json();
         if (data.success) {

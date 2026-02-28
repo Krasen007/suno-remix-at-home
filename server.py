@@ -8,6 +8,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler, SimpleHTTPRequestHan
 from socketserver import ThreadingMixIn
 import threading
 import logging
+import base64
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,6 +20,8 @@ REQUEST_TIMEOUT = 10
 MAX_BODY_SIZE = 1024 * 512  # 512KB
 HISTORY_FILE = "history.json"
 HISTORY_LOCK = threading.Lock()
+HISTORY_MAX_ENTRIES = 100
+UPLOAD_TIMEOUT = 30
 def load_env():
     if os.path.exists(".env"):
         with open(".env", "r") as f:
@@ -28,10 +31,22 @@ def load_env():
                     continue
                 if "=" in line:
                     key, value = line.split("=", 1)
-                    # Strip inline comments
-                    if "#" in value:
-                        value = value.split("#", 1)[0]
-                    os.environ[key.strip()] = value.strip().strip("'\"")
+                    key = key.strip()
+                    value = value.strip()
+                    
+                    # Strip inline comments respecting quotes
+                    new_val = []
+                    in_quote = None
+                    for char in value:
+                        if char in ("'", '"'):
+                            if in_quote == char: in_quote = None
+                            elif in_quote is None: in_quote = char
+                        elif char == "#" and in_quote is None:
+                            break
+                        new_val.append(char)
+                    
+                    value = "".join(new_val).strip().strip("'\"")
+                    os.environ[key] = value
 
 load_env()
 
@@ -124,6 +139,10 @@ def save_to_history(result):
         result["timestamp"] = time.time()
         history.insert(0, result)
         
+        # Prune history
+        if len(history) > HISTORY_MAX_ENTRIES:
+            history = history[:HISTORY_MAX_ENTRIES]
+        
         # Atomic write
         temp_file = f"{HISTORY_FILE}.tmp"
         try:
@@ -138,7 +157,6 @@ def push_to_github(file_data, filename):
     if not all([GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO]):
         return None, "GitHub configuration missing in .env"
     
-    import base64
     # Sanitize github path
     safe_name = "".join(c for c in filename if c.isalnum() or c in (".", "-", "_")).strip()
     path = f"uploads/{int(time.time())}_{safe_name}"
@@ -157,7 +175,7 @@ def push_to_github(file_data, filename):
     }
     
     try:
-        response = requests.put(url, headers=headers, json=payload, timeout=30)
+        response = requests.put(url, headers=headers, json=payload, timeout=UPLOAD_TIMEOUT)
         if response.status_code in [200, 201]:
             raw_url = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/{path}"
             return raw_url, None
@@ -238,6 +256,7 @@ class RemixHandler(BaseHTTPRequestHandler):
             elif full_path.endswith(".mp3"): self.send_header('Content-Type', 'audio/mpeg')
             elif full_path.endswith(".png"): self.send_header('Content-Type', 'image/png')
             elif full_path.endswith(".jpg"): self.send_header('Content-Type', 'image/jpeg')
+            else: self.send_header('Content-Type', 'application/octet-stream')
             self.end_headers()
             with open(full_path, 'rb') as f:
                 self.wfile.write(f.read())
@@ -275,8 +294,20 @@ class RemixHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             # Credit Guard
-            credits, error = get_credits_data()
-            if error or (credits is not None and credits <= 0):
+            credits_data, error = get_credits_data()
+            credits_value = None
+            if credits_data is not None:
+                if isinstance(credits_data, dict):
+                    credits_value = credits_data.get("credits") or credits_data.get("credit")
+                else:
+                    credits_value = credits_data
+            
+            try:
+                credits_value = float(credits_value) if credits_value is not None else None
+            except (ValueError, TypeError):
+                credits_value = None
+
+            if error or (credits_value is not None and credits_value <= 0):
                 msg = error if error else "Insufficient credits to start session."
                 self._send_sse('log', {'message': f"Error: {msg}", 'level': 'error'})
                 return
@@ -339,7 +370,13 @@ class RemixHandler(BaseHTTPRequestHandler):
                 self.send_error(411, "Length Required")
                 return
             
-            content_length = int(content_length)
+            try:
+                content_length = int(content_length)
+            except ValueError:
+                logger.error(f"Invalid Content-Length for upload: {content_length}")
+                self.send_error(400, "Invalid Content-Length")
+                return
+
             if content_length > 100 * 1024 * 1024:  # 100MB limit
                 self.send_error(413, "File too large (100MB max)")
                 return
@@ -366,9 +403,12 @@ class RemixHandler(BaseHTTPRequestHandler):
             self.send_error(404)
 
     def _send_sse(self, event_type, data):
-        payload = json.dumps({'type': event_type, **data})
-        self.wfile.write(f"data: {payload}\n\n".encode())
-        self.wfile.flush()
+        try:
+            payload = json.dumps({'type': event_type, **data})
+            self.wfile.write(f"data: {payload}\n\n".encode())
+            self.wfile.flush()
+        except (BrokenPipeError, OSError) as e:
+            logger.debug(f"SSE client disconnected: {e}")
 
 if __name__ == "__main__":
     if not SUNO_API_KEY:

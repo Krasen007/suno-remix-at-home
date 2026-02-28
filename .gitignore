@@ -1,7 +1,8 @@
-.opencode
-remixes/
-uploads/
-history.json
+# Ignore generated uploads, remixes and history file at repo root
+/.opencode
+/remixes/
+/uploads/
+/history.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
