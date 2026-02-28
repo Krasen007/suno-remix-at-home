@@ -70,20 +70,20 @@ python remix.py
 
 ## Configuration Options
 
-| Parameter | Description |
-|-----------|-------------|
-| `SUNO_API_KEY` | Your Suno API key |
-| `BASE_URL` | API endpoint (default: https://api.sunoapi.org/api/v1) |
-| `TRACKS` | List of tracks to remix |
+| Parameter      | Description                                            |
+| -------------- | ------------------------------------------------------ |
+| `SUNO_API_KEY` | Your Suno API key                                      |
+| `BASE_URL`     | API endpoint (default: https://api.sunoapi.org/api/v1) |
+| `TRACKS`       | List of tracks to remix                                |
 
 ### Track Settings
 
-| Field | Description |
-|-------|-------------|
+| Field       | Description                |
+| ----------- | -------------------------- |
 | `uploadUrl` | GitHub Raw URL of your MP3 |
-| `title` | Title for the remix |
-| `style` | Genre/style description |
-| `prompt` | Instructions for the AI |
+| `title`     | Title for the remix        |
+| `style`     | Genre/style description    |
+| `prompt`    | Instructions for the AI    |
 
 ## Output
 
@@ -94,20 +94,21 @@ After running, you'll get:
 
 ## API Error Codes
 
-| Code | Meaning | Fix |
-|------|---------|-----|
-| 400 | Bad request | Check parameters |
-| 401 | Invalid API key | Check SUNO_API_KEY |
-| 413 | Payload too long | Trim prompt/style/title |
-| 429 | No credits | Buy more credits |
-| 451 | Can't download audio | Make GitHub repo PUBLIC |
-| 500 | Server error | Retry after 30s |
+| Code | Meaning              | Fix                     |
+| ---- | -------------------- | ----------------------- |
+| 400  | Bad request          | Check parameters        |
+| 401  | Invalid API key      | Check SUNO_API_KEY      |
+| 413  | Payload too long     | Trim prompt/style/title |
+| 429  | No credits           | Buy more credits        |
+| 451  | Can't download audio | Make GitHub repo PUBLIC |
+| 500  | Server error         | Retry after 30s         |
 
 ## Credits System
 
 The script automatically checks your remaining credits before starting:
-- **Endpoint**: `/generate/credit` 
-- **Response**: Shows exact credit balance
+
+- **Endpoint**: `/get-credits`
+- **Response**: Shows exact credit balance (`data["data"]["credits"]`)
 - **Requirement**: Remix jobs need multiple credits
 - **Action**: Top up at [sunoapi.org](https://sunoapi.org) if insufficient
 
