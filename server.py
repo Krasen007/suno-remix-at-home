@@ -64,10 +64,27 @@ def download_audio(url, filename):
             path = f"remixes/{filename}.mp3"
             with open(path, "wb") as f:
                 f.write(res.content)
-            return path
+            return path, f"/remixes/{filename}.mp3"
     except:
         pass
-    return None
+    return None, None
+
+def save_to_history(result):
+    history_file = "history.json"
+    history = []
+    if os.path.exists(history_file):
+        try:
+            with open(history_file, "r") as f:
+                history = json.load(f)
+        except:
+            history = []
+    
+    # Add timestamp
+    result["timestamp"] = time.time()
+    history.insert(0, result) # Newest first
+    
+    with open(history_file, "w") as f:
+        json.dump(history, f, indent=2)
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     pass
@@ -84,10 +101,12 @@ class RemixHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path == '/':
-            self.path = '/index.html'
+        decoded_path = urllib.parse.unquote(self.path)
         
-        if self.path == '/api/credits':
+        if decoded_path == '/':
+            decoded_path = '/index.html'
+        
+        if decoded_path == '/api/credits':
             credits, error = get_credits_data()
             if error:
                 self.send_response(400)
@@ -101,13 +120,32 @@ class RemixHandler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"success": True, "credits": credits}).encode())
             return
 
-        # Serve static files from 'www'
-        full_path = os.path.join('www', self.path.lstrip('/'))
+        if decoded_path == '/api/history':
+            history_file = "history.json"
+            history = []
+            if os.path.exists(history_file):
+                with open(history_file, "r") as f:
+                    history = json.load(f)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(history).encode())
+            return
+
+        # Serve static files from 'www' or 'remixes'
+        if decoded_path.startswith('/remixes/'):
+            full_path = decoded_path.lstrip('/')
+        else:
+            full_path = os.path.join('www', decoded_path.lstrip('/'))
+
         if os.path.exists(full_path) and not os.path.isdir(full_path):
             self.send_response(200)
             if full_path.endswith(".html"): self.send_header('Content-Type', 'text/html')
             elif full_path.endswith(".css"): self.send_header('Content-Type', 'text/css')
             elif full_path.endswith(".js"): self.send_header('Content-Type', 'application/javascript')
+            elif full_path.endswith(".mp3"): self.send_header('Content-Type', 'audio/mpeg')
+            elif full_path.endswith(".png"): self.send_header('Content-Type', 'image/png')
+            elif full_path.endswith(".jpg"): self.send_header('Content-Type', 'image/jpeg')
             self.end_headers()
             with open(full_path, 'rb') as f:
                 self.wfile.write(f.read())
@@ -149,13 +187,19 @@ class RemixHandler(BaseHTTPRequestHandler):
                         variants = data_root.get("response", {}).get("sunoData", [])
                         images = data_root.get("images", [])
                         
+                        updated_variants = []
                         for idx, v in enumerate(variants):
                             fname = f"{track['title']}_v{idx+1}"
-                            path = download_audio(v['audioUrl'], fname)
-                            if path:
+                            path, local_url = download_audio(v['audioUrl'], fname)
+                            v_copy = v.copy()
+                            if local_url:
                                 self._send_sse('log', {'message': f"Saved: {path}", 'level': 'success'})
+                                v_copy["localUrl"] = local_url
+                            updated_variants.append(v_copy)
                         
-                        self._send_sse('result', {'title': track['title'], 'variants': variants, 'images': images})
+                        result_payload = {'title': track['title'], 'variants': updated_variants, 'images': images}
+                        save_to_history(result_payload)
+                        self._send_sse('result', result_payload)
                         break
                     elif status == "FAILED":
                         err = poll_data.get("data", {}).get("errorMessage", "Unknown failure")

@@ -1,0 +1,71 @@
+[
+  {
+    "title": "Fairytale Solo From API",
+    "timestamp": 1772309555.0,
+    "images": [],
+    "variants": [
+      {
+        "id": "89e004d1-933d-40d8-a00b-9a1f5f9fc3e9",
+        "title": "Fairytale Solo From API",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/4cc6ffbd821940dabea00d535db4942f.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/ODllMDA0ZDEtOTMzZC00MGQ4LWEwMGItOWExZjVmOWZjM2U5.jpeg",
+        "duration": 50.48,
+        "localUrl": "/remixes/Fairytale Solo From API_v1.mp3"
+      },
+      {
+        "id": "3c5e87f7-d10f-46a4-95d7-637d2d8f30ab",
+        "title": "Fairytale Solo From API",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/94dd69369bf34d429ce7df62fa1e2218.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/M2M1ZTg3ZjctZDEwZi00NmE0LTk1ZDctNjM3ZDJkOGYzMGFi.jpeg",
+        "duration": 79.96,
+        "localUrl": "/remixes/Fairytale Solo From API_v2.mp3"
+      }
+    ]
+  },
+  {
+    "title": "Fairytale Solo From API",
+    "timestamp": 1772309392.0,
+    "images": [],
+    "variants": [
+      {
+        "id": "164dae7f-83f6-4b32-a11a-d8de84e6174e",
+        "title": "Fairytale Solo From API",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/866a286b2be847a78138374343ae0eac.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/MTY0ZGFlN2YtODNmNi00YjMyLWExMWEtZDhkZTg0ZTYxNzRl.jpeg",
+        "duration": 80.08,
+        "localUrl": "/remixes/Fairytale Solo From API_v3.mp3"
+      },
+      {
+        "id": "af2d2e80-39f6-4913-b9bf-20d7a847148b",
+        "title": "Fairytale Solo From API",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/d8114c441d1c4d54be3ba06626fa76f2.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/YWYyZDJlODAtMzlmNi00OTEzLWI5YmYtMjBkN2E4NDcxNDhi.jpeg",
+        "duration": 148.2,
+        "localUrl": "/remixes/Fairytale Solo From API_v4.mp3"
+      }
+    ]
+  },
+  {
+    "title": "Fairytale Solo From API",
+    "timestamp": 1772309234.0,
+    "images": [],
+    "variants": [
+      {
+        "id": "c4d1f12a-0951-42aa-a620-95474037f72b",
+        "title": "Fairytale Solo From API",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/9b8008eac3974beaa8be58a2edc73e73.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/YzRkMWYxMmEtMDk1MS00MmFhLWE2MjAtOTU0NzQwMzdmNzJi.jpeg",
+        "duration": 164.96,
+        "localUrl": "/remixes/Fairytale Solo From API_v5.mp3"
+      },
+      {
+        "id": "f6adef25-8b94-444e-8dab-0ea08642952e",
+        "title": "Fairytale Solo From API",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/a97baf1d123e4c07b96f3ccca1e89f8b.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/ZjZhZGVmMjUtOGI5NC00NDRlLThkYWItMGVhMDg2NDI5NTJl.jpeg",
+        "duration": 72.56,
+        "localUrl": "/remixes/Fairytale Solo From API_v6.mp3"
+      }
+    ]
+  }
+]

@@ -266,7 +266,7 @@ textarea { min-height: 80px; resize: vertical; }
 .log.error { color: var(--danger); }
 
 /* Results */
-.results-wrapper { margin-top: 2rem; }
+.results-wrapper, .history-wrapper { margin-top: 2rem; }
 .results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));

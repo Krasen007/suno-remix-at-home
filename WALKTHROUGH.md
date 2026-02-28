@@ -1,120 +1,76 @@
 # Suno Remix at Home - Walkthrough
 
-A minimal Python script to remix your MP3 files using Suno's AI API.
+A professional dashboard and CLI tool to remix your MP3 files using Suno's AI API.
 
-## What This Does
+## 🌟 How It Works
 
-1. Takes MP3 files you host on GitHub
-2. Sends them to Suno for AI remixing
-3. Polls for completion
-4. Downloads the remixed MP3s locally
+1.  **Hosting**: You host your MP3/WAV files on a public GitHub repository.
+2.  **Request**: You provide the GitHub Raw URL and your desired musical style through the web dashboard.
+3.  **Authentication**: The server uses your Suno API Key to submit a "cover" request.
+4.  **Processing**: Suno's AI generates multiple remix variants.
+5.  **Streaming**: The server polls the API and streams live logs to your browser.
+6.  **Archiving**: Completed remixes are automatically downloaded to your local `remixes/` folder and saved to `history.json` for permanent access.
 
-## Quick Start
+## 🛠️ Step-by-Step Setup
 
-### 1. Set Up Virtual Environment
+### 1. Environment Activation
 
 ```bash
-# Activate the virtual environment
 .venv\Scripts\Activate.ps1
-
-# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 2. Get Your Suno API Key
+### 2. API Key Configuration
 
-1. Go to [sunoapi.org](https://sunoapi.org)
-2. Get an API key from your dashboard
-3. Set up environment variables:
-   ```bash
-   # Copy the example file
-   cp .env.example .env
-   # Edit .env with your API key
-   ```
+Obtain your key from [sunoapi.org](https://sunoapi.org) and add it to your `.env` file:
 
-### 3. Check Your Credits
-
-The script automatically checks your remaining credits before starting. Remix jobs require multiple credits - top up at [sunoapi.org](https://sunoapi.org) if needed.
-
-### 4. Host Your MP3 on GitHub
-
-1. Create a public GitHub repo
-2. Add your MP3 file
-3. Click "Raw" to get the URL
-4. Example: `https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/song.mp3`
-
-### 5. Configure the Script
-
-Open `remix.py` and edit:
-
-```python
-SUNO_API_KEY = os.getenv("SUNO_API_KEY", "your-api-key-here")
-
-TRACKS = [
-    {
-        "uploadUrl": "https://raw.githubusercontent.com/YOU/REPO/main/song.mp3",
-        "title": "My Remix",
-        "style": "Electronic, Synth Pop",
-        "prompt": "Transform into an upbeat electronic remix",
-    },
-]
+```env
+SUNO_API_KEY=your_key_here
 ```
 
-### 6. Run It
+### 3. Audio Preparation
 
-Make sure your virtual environment is activated (you should see `(.venv)` in your terminal), then:
+The Suno API requires a public URL to download your source audio.
+
+1.  Upload your MP3 to a public GitHub repo.
+2.  Click the file, then click **"Raw"**.
+3.  Copy the URL (it should look like `https://raw.githubusercontent.com/...`).
+
+### 4. Launching the Dashboard
+
+Start the local development server:
 
 ```bash
-python remix.py
+python server.py
 ```
 
-## Configuration Options
+Visit **[http://localhost:5000](http://localhost:5000)** to access the interface.
 
-| Parameter      | Description                                            |
-| -------------- | ------------------------------------------------------ |
-| `SUNO_API_KEY` | Your Suno API key                                      |
-| `BASE_URL`     | API endpoint (default: https://api.sunoapi.org/api/v1) |
-| `TRACKS`       | List of tracks to remix                                |
+## 🖥️ Using the Dashboard
 
-### Track Settings
+- **Add Tracks**: Increase the number of tracks to process in a single session.
+- **Config Settings**:
+  - **Title**: What the remix will be named.
+  - **Lyrics**: Input the lyrics or instructions for the remix.
+  - **Style**: Comma-separated descriptors (e.g., `80s synth, upbeat, high energy`).
+  - **Toggles**: Enable "Custom Mode" or "Instrumental" as needed.
+- **Terminal Output**: Monitor the "PENDING" and "SUCCESS" statuses in real-time.
+- **Local History**: Play back old remixes from the archive below the main results.
 
-| Field       | Description                |
-| ----------- | -------------------------- |
-| `uploadUrl` | GitHub Raw URL of your MP3 |
-| `title`     | Title for the remix        |
-| `style`     | Genre/style description    |
-| `prompt`    | Instructions for the AI    |
+## 📂 Project Structure
 
-## Output
+- `server.py`: The lightweight Python server (no Flask/Node dependencies).
+- `remix.py`: Standalone CLI script for automated jobs.
+- `www/`: The pure JavaScript frontend.
+- `remixes/`: Your permanent local audio library.
+- `history.json`: The local data store for your persistent archive.
 
-After running, you'll get:
+## ⚠️ Important Limitations
 
-- `remix_results.json` - Full results with audio URLs
-- `remixes/` folder - Downloaded MP3 files
+- **Credit Requirements**: Each remix consumes Suno API credits. Check your balance via the "Credits" badge in the UI.
+- **Link Expiration**: Remote audio links from Suno usually expire after 15 days. **Suno Remix At Home** solves this by automatically downloading the files for you.
+- **GitHub Limits**: Ensure your source file is under 100MB per GitHub's standard limits.
 
-## API Error Codes
+---
 
-| Code | Meaning              | Fix                     |
-| ---- | -------------------- | ----------------------- |
-| 400  | Bad request          | Check parameters        |
-| 401  | Invalid API key      | Check SUNO_API_KEY      |
-| 413  | Payload too long     | Trim prompt/style/title |
-| 429  | No credits           | Buy more credits        |
-| 451  | Can't download audio | Make GitHub repo PUBLIC |
-| 500  | Server error         | Retry after 30s         |
-
-## Credits System
-
-The script automatically checks your remaining credits before starting:
-
-- **Endpoint**: `/get-credits`
-- **Response**: Shows exact credit balance (`data["data"]["credits"]`)
-- **Requirement**: Remix jobs need multiple credits
-- **Action**: Top up at [sunoapi.org](https://sunoapi.org) if insufficient
-
-## Important Notes
-
-- **Polling**: Script waits 30 seconds between checks (avoid rate limits)
-- **Timeout**: Max 10 minutes per track
-- **Audio expiry**: Download remixes within 15 days - Suno deletes them after that
-- **File size**: Max 100MB per MP3 (GitHub limit)
+_Powered by Suno API | Built with Vanilla JS & Python_

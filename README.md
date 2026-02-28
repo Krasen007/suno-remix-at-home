@@ -1,70 +1,54 @@
 # Suno Remix at Home
 
-A minimal Python script to remix your MP3 files using Suno's AI API.
+A powerful tool to remix your MP3 files using Suno's AI API. Now featuring a modern web interface for easier configuration and persistent local history.
 
-## Quick Start
+## 🚀 Web Interface Quick Start
+
+The recommended way to use Suno Remix is through the integrated dashboard.
 
 ```bash
-# 1. Set up virtual environment
+# 1. Set up and Activate virtual environment
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 
-# 2. Set your API key (copy .env.example to .env first)
-cp .env.example .env
-# Edit .env with your SUNO_API_KEY
+# 2. Set your API key
+# Copy .env.example to .env and paste your SUNO_API_KEY
 
-# 3. Configure tracks in remix.py
-# Edit the TRACKS list with your audio URLs and preferences
-
-# 4. Run the script
-python remix.py
+# 3. Start the Web Server
+python server.py
 ```
 
-## What It Does
+Open your browser to: **[http://localhost:5000](http://localhost:5000)**
 
-- 🎵 Takes MP3/WAV files hosted on GitHub
-- 🤖 Sends them to Suno for AI remixing  
-- ⏳ Polls for completion (30s intervals)
-- 💾 Downloads remixed files locally
+## ✨ Dashboard Features
 
-## Requirements
+- **Dynamic Track Management**: Add and configure multiple tracks without touching code.
+- **Custom Mode & Instrumentals**: Full control over Suno's generation parameters.
+- **Real-time Terminal**: Watch the API polling and download progress live.
+- **Cover Art**: View generated artwork alongside your variants.
+- **Local Persistence**:
+  - **Auto-Download**: Files are saved to the `remixes/` folder automatically.
+  - **History**: Local history is stored in `history.json`, allowing playback even after API links expire.
+
+## 💾 Requirements
 
 - Python 3.10+
 - Suno API key from [sunoapi.org](https://sunoapi.org)
-- Public GitHub repository for audio files
+- Public GitHub repository raw URLs for audio files
 
-## Output
+## 🛠️ CLI Usage (Legacy)
 
-- `remix_results.json` - API response data
-- `remixes/` folder - Downloaded MP3 files
+If you prefer the command line, you can still use the standalone script:
 
-## Environment Setup
+1. Configure `TRACKS` in `remix.py`.
+2. Run `python remix.py`.
 
-The script uses environment variables for security:
+## 📂 Output Structure
 
-```bash
-# Local development
-SUNO_API_KEY=your_key_here
+- `remixes/` - Your downloaded MP3 files (permanent).
+- `history.json` - Complete local archive of your remix sessions.
+- `remix_results.json` - Raw API output from the latest CLI run.
 
-# GitHub Actions (automatic)
-# Set SUNO_API_KEY in repo secrets
-```
+---
 
-## Configuration
-
-Edit `remix.py` to configure your tracks:
-
-```python
-TRACKS = [
-    {
-        "uploadUrl": "https://raw.githubusercontent.com/USER/REPO/main/song.mp3",
-        "title": "My Remix",
-        "style": "Electronic, Synth Pop", 
-        "prompt": "Transform into an upbeat electronic remix",
-    },
-]
-```
-
-## Credits
-
-The script checks your remaining credits before starting. Remix jobs require multiple credits - top up at [sunoapi.org](https://sunoapi.org) if needed.
+_Note: Suno API links expire after 15 days. Use the "Past Remixes" section in the dashboard to play your permanent local copies._

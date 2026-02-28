@@ -24,6 +24,8 @@ const runBtn = document.getElementById("run-btn");
 const creditsBadge = document.getElementById("credits-badge");
 const refreshCreditsBtn = document.getElementById("refresh-credits");
 const clearLogsBtn = document.getElementById("clear-logs");
+const refreshHistoryBtn = document.getElementById("refresh-history");
+const historyGrid = document.getElementById("history-grid");
 const serverStatus = document.getElementById("server-status");
 
 // Initialization
@@ -31,11 +33,13 @@ function init() {
   renderTracks();
   refreshCredits();
   checkServer();
+  loadHistory();
 
   // Event Listeners
   addTrackBtn.addEventListener("click", addTrack);
   runBtn.addEventListener("click", startRemix);
   refreshCreditsBtn.addEventListener("click", refreshCredits);
+  refreshHistoryBtn.addEventListener("click", loadHistory);
   clearLogsBtn.addEventListener("click", () => {
     consoleOutput.innerHTML = "";
     addLog("Console cleared.", "info");
@@ -159,6 +163,21 @@ async function checkServer() {
   }
 }
 
+async function loadHistory() {
+  try {
+    const res = await fetch("/api/history");
+    const history = await res.json();
+    historyGrid.innerHTML = "";
+    if (history.length === 0) {
+      historyGrid.innerHTML = '<div class="empty-state">No past remixes found.</div>';
+    } else {
+      history.forEach((item) => addResult(item, historyGrid));
+    }
+  } catch (e) {
+    console.error("Failed to load history", e);
+  }
+}
+
 function addLog(message, level = "info") {
   const log = document.createElement("div");
   log.className = `log ${level}`;
@@ -173,10 +192,10 @@ function addLog(message, level = "info") {
   consoleOutput.scrollTop = consoleOutput.scrollHeight;
 }
 
-function addResult(result) {
+function addResult(result, container = resultsGrid) {
   // Clear empty state if first result
-  if (resultsGrid.querySelector(".empty-state")) {
-    resultsGrid.innerHTML = "";
+  if (container.querySelector(".empty-state")) {
+    container.innerHTML = "";
   }
 
   const template = document.getElementById("result-template");
@@ -186,7 +205,9 @@ function addResult(result) {
     clone.querySelector(".res-title").textContent =
       `${result.title} (v${i + 1})`;
     clone.querySelector(".res-dur").textContent = v.duration || "--";
-    clone.querySelector(".res-audio").src = v.audioUrl;
+    
+    // Prioritize local URL for playback if it exists
+    clone.querySelector(".res-audio").src = v.localUrl || v.audioUrl;
     clone.querySelector(".res-link").href = v.audioUrl;
 
     // Display cover art
@@ -197,7 +218,7 @@ function addResult(result) {
       img.classList.remove("hidden");
     }
 
-    resultsGrid.appendChild(clone);
+    container.appendChild(clone);
   });
 }
 
