@@ -1,5 +1,5 @@
 // Main Application Orchestration
-import { loadState, addTrack, removeTrack, updateTrack } from './state.js';
+import { loadState, addTrack, removeTrack, updateTrack, setApiKey } from './state.js';
 import { refreshCredits, checkServer, loadHistory, deleteHistoryItem } from './api.js';
 import { 
   initializeElements, 
@@ -11,7 +11,8 @@ import {
   renderTracks,
   addResult,
   renderHistory,
-  showHistoryError
+  showHistoryError,
+  setupApiKeyHandlers
 } from './ui.js';
 import { handleFileUpload } from './upload.js';
 import { startRemixProcess } from './remix.js';
@@ -29,6 +30,9 @@ function init() {
   refreshCreditsUI();
   checkServerUI();
   loadHistoryUI();
+  
+  // Setup API key handlers
+  setupApiKeyHandlers(setApiKey, addLog);
   
   // Setup event listeners
   setupEventListeners();

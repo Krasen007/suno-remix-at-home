@@ -3,7 +3,13 @@ import { state, setCredits } from './state.js';
 
 export async function refreshCredits(addLog) {
   try {
-    const res = await fetch("/api/credits");
+    const res = await fetch("/api/credits", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ apiKey: state.apiKey }),
+    });
     if (!res.ok) {
       const errText = await res.text();
       addLog(`Credits error (${res.status}): ${errText}`, "error");
@@ -107,7 +113,7 @@ export async function startRemixSession(tracks, onLog, onResult, onDone, onError
     const response = await fetch("/api/remix", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tracks }),
+      body: JSON.stringify({ tracks, apiKey: state.apiKey }),
     });
 
     const reader = response.body.getReader();

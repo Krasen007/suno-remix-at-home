@@ -17,6 +17,8 @@ export function initializeElements() {
     refreshHistoryBtn: document.getElementById("refresh-history"),
     historyGrid: document.getElementById("history-grid"),
     serverStatus: document.getElementById("server-status"),
+    apiKeyInput: document.getElementById("api-key-input"),
+    saveApiKeyBtn: document.getElementById("save-api-key"),
   };
   return elements;
 }
@@ -192,4 +194,30 @@ export function renderHistory(history, onDeleteItem) {
 
 export function showHistoryError(message) {
   elements.historyGrid.innerHTML = `<div class="empty-state">${message}</div>`;
+}
+
+export function setupApiKeyHandlers(setApiKey, addLog) {
+  // Load saved API key into input
+  if (state.apiKey) {
+    elements.apiKeyInput.value = state.apiKey;
+  }
+
+  // Handle save button click
+  elements.saveApiKeyBtn.addEventListener('click', () => {
+    const apiKey = elements.apiKeyInput.value.trim();
+    if (!apiKey) {
+      addLog('Please enter an API key', 'error');
+      return;
+    }
+    
+    setApiKey(apiKey);
+    addLog('API key saved successfully', 'success');
+  });
+
+  // Handle Enter key in input
+  elements.apiKeyInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      elements.saveApiKeyBtn.click();
+    }
+  });
 }

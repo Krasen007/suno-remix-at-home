@@ -65,11 +65,16 @@ HEADERS = {
 POLL_INTERVAL = 30
 TIMEOUT_SECONDS = 600
 
-def get_credits_data():
-    if not SUNO_API_KEY:
-        return None, "SUNO_API_KEY not set"
+def get_credits_data(api_key=None):
+    key_to_use = api_key or SUNO_API_KEY
+    if not key_to_use:
+        return None, "API key not provided"
     try:
-        response = requests.get(f"{BASE_URL}/generate/credit", headers=HEADERS, timeout=REQUEST_TIMEOUT)
+        headers = {
+            "Authorization": f"Bearer {key_to_use}",
+            "Content-Type": "application/json",
+        }
+        response = requests.get(f"{BASE_URL}/generate/credit", headers=headers, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
         data = response.json()
         if data.get("code") == 200:
@@ -79,9 +84,16 @@ def get_credits_data():
         logger.error(f"Credit check failed: {e}")
         return None, f"Request failed: {str(e)}"
 
-def submit_track(track):
-    if not SUNO_API_KEY:
-        return None, "SUNO_API_KEY not set"
+def submit_track(track, api_key=None):
+    key_to_use = api_key or SUNO_API_KEY
+    if not key_to_use:
+        return None, "API key not provided"
+    
+    headers = {
+        "Authorization": f"Bearer {key_to_use}",
+        "Content-Type": "application/json",
+    }
+    
     payload = {
         "uploadUrl": track["uploadUrl"],
         "customMode": track.get("customMode", True),
@@ -93,7 +105,7 @@ def submit_track(track):
         "callBackUrl": "https://httpbin.org/post"
     }
     try:
-        response = requests.post(f"{BASE_URL}/generate/upload-cover", headers=HEADERS, json=payload, timeout=REQUEST_TIMEOUT)
+        response = requests.post(f"{BASE_URL}/generate/upload-cover", headers=headers, json=payload, timeout=REQUEST_TIMEOUT)
         response.raise_for_status()
         data = response.json()
         if data.get("code") == 200:
@@ -283,19 +295,8 @@ class RemixHandler(BaseHTTPRequestHandler):
         if decoded_path == '/':
             decoded_path = '/index.html'
         
-        if decoded_path == '/api/credits':
-            credits, error = get_credits_data()
-            if error:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": False, "message": error}).encode())
-            else:
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True, "credits": credits}).encode())
-            return
+        # Remove credits endpoint from GET - it's now POST only
+        # if decoded_path == '/api/credits':
 
         if decoded_path == '/api/history':
             with HISTORY_LOCK:
@@ -341,6 +342,31 @@ class RemixHandler(BaseHTTPRequestHandler):
             self.send_error(404, "File not found")
 
     def do_POST(self):
+        if self.path == '/api/credits':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length).decode('utf-8') if content_length > 0 else '{}'
+            
+            api_key = None
+            try:
+                if post_data:
+                    data = json.loads(post_data)
+                    api_key = data.get('apiKey')
+            except json.JSONDecodeError:
+                pass
+            
+            credits, error = get_credits_data(api_key)
+            if error:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": False, "message": error}).encode())
+            else:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"success": True, "credits": credits}).encode())
+            return
+        
         if self.path == '/api/remix':
             content_length = self.headers.get('Content-Length')
             if not content_length:
@@ -359,7 +385,9 @@ class RemixHandler(BaseHTTPRequestHandler):
                 
             try:
                 post_data = self.rfile.read(content_length)
-                tracks = json.loads(post_data).get("tracks", [])
+                request_data = json.loads(post_data)
+                tracks = request_data.get("tracks", [])
+                api_key = request_data.get("apiKey")
             except (json.JSONDecodeError, UnicodeDecodeError):
                 self.send_error(400, "Invalid JSON")
                 return
@@ -371,7 +399,7 @@ class RemixHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
             # Credit Guard
-            credits_data, error = get_credits_data()
+            credits_data, error = get_credits_data(api_key)
             credits_value = None
             if credits_data is not None:
                 if isinstance(credits_data, dict):
@@ -392,7 +420,7 @@ class RemixHandler(BaseHTTPRequestHandler):
             for i, track in enumerate(tracks):
                 self._send_sse('log', {'message': f"[{i+1}/{len(tracks)}] Processing: {track['title']}", 'level': 'info'})
                 
-                task_id, error = submit_track(track)
+                task_id, error = submit_track(track, api_key)
                 if error:
                     self._send_sse('log', {'message': f"Error: {error}", 'level': 'error'})
                     continue
@@ -402,7 +430,11 @@ class RemixHandler(BaseHTTPRequestHandler):
                 deadline = time.time() + TIMEOUT_SECONDS
                 while time.time() < deadline:
                     try:
-                        poll = requests.get(f"{BASE_URL}/generate/record-info", params={"taskId": task_id}, headers=HEADERS, timeout=REQUEST_TIMEOUT)
+                        poll_headers = {
+                            "Authorization": f"Bearer {api_key}",
+                            "Content-Type": "application/json",
+                        }
+                        poll = requests.get(f"{BASE_URL}/generate/record-info", params={"taskId": task_id}, headers=poll_headers, timeout=REQUEST_TIMEOUT)
                         poll.raise_for_status()
                         poll_data = poll.json()
                     except (requests.exceptions.RequestException, json.JSONDecodeError) as e:

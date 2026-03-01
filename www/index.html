@@ -37,6 +37,25 @@
             </button>
           </div>
 
+          <div class="form-group">
+            <label>Suno API Key</label>
+            <div class="input-with-button">
+              <input
+                type="password"
+                id="api-key-input"
+                placeholder="Enter your Suno API key..."
+                class="api-key-input"
+                form="api-key-form"
+              />
+              <button id="save-api-key" class="btn btn-secondary btn-sm" form="api-key-form">
+                💾 Save
+              </button>
+            </div>
+            <small class="form-help">Your API key is stored locally in your browser</small>
+          </div>
+
+          <form id="api-key-form" style="display: none;"></form>
+
           <div id="tracks-container" class="tracks-list">
             <!-- Tracks will be injected here -->
           </div>
