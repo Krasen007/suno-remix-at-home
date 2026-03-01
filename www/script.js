@@ -9,6 +9,7 @@ import {
   updateServerStatus, 
   updateUIForRunning,
   renderTracks,
+  addResult,
   renderHistory,
   showHistoryError,
   setupApiKeyHandlers
@@ -234,8 +235,10 @@ function setupEventListeners() {
 
 // UI Update Functions
 async function refreshCreditsUI() {
-  const credits = await refreshCredits(addLog);
-  if (credits !== null) {
+  const { credits, error } = await refreshCredits(addLog);
+  if (error) {
+    addLog(`Failed to refresh credits: ${error}`, "error");
+  } else if (credits !== null) {
     updateCreditsBadge(credits);
   }
 }
@@ -255,9 +258,11 @@ async function loadHistoryUI() {
 }
 
 async function deleteHistoryItemUI(timestamp, variantId) {
-  const success = await deleteHistoryItem(timestamp, variantId, addLog);
+  const { success, error } = await deleteHistoryItem(timestamp, variantId, addLog);
   if (success) {
     loadHistoryUI();
+  } else if (error && error !== "User cancelled deletion") {
+    addLog(`Failed to delete item: ${error}`, "error");
   }
 }
 

@@ -213,12 +213,8 @@ export function renderHistory(history) {
     return;
   }
   
-  if (historyArray.length === 0) {
-    elements.historyGrid.innerHTML = '<div class="empty-state">No past remixes found.</div>';
-  } else {
-    // Render history in chronological order (oldest first)
-    historyArray.forEach((item) => addResult(item, elements.historyGrid));
-  }
+  // Render history in chronological order (oldest first)
+  historyArray.forEach((item) => addResult(item, elements.historyGrid));
 }
 
 export function showHistoryError(message) {

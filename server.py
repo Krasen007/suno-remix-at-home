@@ -70,7 +70,16 @@ def get_credits_data(api_key=None):
         data = response.json()
         if data.get("code") == 200:
             return data["data"], None
-        return None, data.get("msg", "Unknown error")
+        # Provide more specific error messages for common issues
+        error_msg = data.get("msg", "Unknown error")
+        if "invalid" in error_msg.lower() or "unauthorized" in error_msg.lower():
+            return None, "Invalid API key. Please check your Suno API key from sunoapi.org and try again."
+        elif "quota" in error_msg.lower() or "limit" in error_msg.lower():
+            return None, f"API quota exceeded: {error_msg}"
+        elif "rate" in error_msg.lower():
+            return None, f"Rate limit exceeded: {error_msg}. Please wait and try again."
+        else:
+            return None, f"API error: {error_msg}"
     except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
         logger.error(f"Credit check failed: {e}")
         return None, f"Request failed: {str(e)}"
@@ -101,7 +110,18 @@ def submit_track(track, api_key=None):
         data = response.json()
         if data.get("code") == 200:
             return data["data"]["taskId"], None
-        return None, data.get("msg", "Submit failed")
+        # Provide more specific error messages for common issues
+        error_msg = data.get("msg", "Submit failed")
+        if "invalid" in error_msg.lower() or "unauthorized" in error_msg.lower():
+            return None, "Invalid API key. Please check your Suno API key from sunoapi.org and try again."
+        elif "quota" in error_msg.lower() or "limit" in error_msg.lower():
+            return None, f"API quota exceeded: {error_msg}"
+        elif "rate" in error_msg.lower():
+            return None, f"Rate limit exceeded: {error_msg}. Please wait and try again."
+        elif "url" in error_msg.lower() or "upload" in error_msg.lower():
+            return None, f"Invalid audio URL: {error_msg}. Please ensure your audio URL is publicly accessible."
+        else:
+            return None, f"Submit failed: {error_msg}"
     except (requests.exceptions.RequestException, json.JSONDecodeError) as e:
         logger.error(f"Submit failed: {e}")
         return None, f"Request failed: {str(e)}"

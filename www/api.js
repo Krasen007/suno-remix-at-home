@@ -12,20 +12,18 @@ export async function refreshCredits(addLog) {
     });
     if (!res.ok) {
       const errText = await res.text();
-      addLog(`Credits error (${res.status}): ${errText}`, "error");
-      return;
+      return { credits: null, error: `Credits error (${res.status}): ${errText}` };
     }
     const data = await res.json();
     if (data.success) {
       setCredits(data.credits);
-      return data.credits;
+      return { credits: data.credits, error: null };
     } else {
-      addLog(`Failed to fetch credits: ${data.message}`, "error");
+      return { credits: null, error: `Failed to fetch credits: ${data.message}` };
     }
   } catch (e) {
-    addLog(`Network error fetching credits: ${e.message}`, "error");
+    return { credits: null, error: `Network error fetching credits: ${e.message}` };
   }
-  return null;
 }
 
 export async function checkServer() {
@@ -62,21 +60,19 @@ export async function loadHistory(addLog) {
 }
 
 export async function deleteHistoryItem(timestamp, variantId, addLog) {
-  if (!confirm("Are you sure you want to delete this specific variant?")) return false;
+  if (!confirm("Are you sure you want to delete this specific variant?")) return { success: false, error: "User cancelled deletion" };
 
   try {
     const url = `/api/history/${timestamp}${variantId ? '/' + variantId : ''}`;
     const res = await fetch(url, { method: "DELETE" });
     if (res.ok) {
       addLog("Item deleted from history.", "info");
-      return true;
+      return { success: true, error: null };
     } else {
-      addLog("Failed to delete item.", "error");
-      return false;
+      return { success: false, error: "Failed to delete item" };
     }
   } catch (e) {
-    addLog("Network error deleting item.", "error");
-    return false;
+    return { success: false, error: `Network error deleting item: ${e.message}` };
   }
 }
 
@@ -84,6 +80,50 @@ export async function uploadToGitHub(file, addLog) {
   // GitHub upload functionality removed - use any public hosting service
   addLog("GitHub upload removed. Please use any public hosting service (Dropbox, Google Drive, personal website, etc.) and paste the URL directly.", "error");
   return null;
+}
+
+// Parse SSE stream data
+function parseSSEStream(reader, onLog, onResult, onDone) {
+  const decoder = new TextDecoder();
+  let sseBuffer = "";
+
+  function processLine(line) {
+    if (line.startsWith("data: ")) {
+      try {
+        const data = JSON.parse(line.substring(6));
+        if (data.type === "log") {
+          onLog(data.message, data.level);
+        } else if (data.type === "result") {
+          onResult(data);
+        } else if (data.type === "done") {
+          onLog("Remix session complete!", "success");
+          onDone();
+        }
+      } catch (e) {
+        onLog(`SSE parse error: ${e.message}`, "error");
+      }
+    }
+  }
+
+  return async function() {
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split("\n");
+        sseBuffer = lines.pop() || "";
+        
+        for (const line of lines) {
+          if (line.trim()) processLine(line);
+        }
+      }
+    } catch (err) {
+      onLog(`Connection error: ${err.message}`, "error");
+      throw err;
+    }
+  };
 }
 
 export async function startRemixSession(tracks, onLog, onResult, onDone, onError) {
@@ -99,45 +139,17 @@ export async function startRemixSession(tracks, onLog, onResult, onDone, onError
       const errorMessage = `Server error: ${response.status} - ${errorBody}`;
       onLog(errorMessage, "error");
       onError(errorMessage);
-      return;
+      return false;
     }
 
     const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let sseBuffer = "";
-
-    function processLine(line) {
-      if (line.startsWith("data: ")) {
-        try {
-          const data = JSON.parse(line.substring(6));
-          if (data.type === "log") {
-            onLog(data.message, data.level);
-          } else if (data.type === "result") {
-            onResult(data);
-          } else if (data.type === "done") {
-            onLog("Remix session complete!", "success");
-            onDone();
-          }
-        } catch (e) {
-          onLog(`SSE parse error: ${e.message}`, "error");
-        }
-      }
-    }
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      
-      sseBuffer += decoder.decode(value, { stream: true });
-      const lines = sseBuffer.split("\n");
-      sseBuffer = lines.pop() || "";
-      
-      for (const line of lines) {
-        if (line.trim()) processLine(line);
-      }
-    }
+    const processStream = parseSSEStream(reader, onLog, onResult, onDone);
+    await processStream();
+    
+    return true;
   } catch (err) {
-    addLog(`Connection error: ${err.message}`, "error");
+    onLog(`Connection error: ${err.message}`, "error");
     onError(err.message);
+    return false;
   }
 }
