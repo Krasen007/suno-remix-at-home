@@ -148,6 +148,9 @@ export function addResult(result, container = elements.resultsGrid) {
 
   const template = document.getElementById("result-template");
 
+  // Insert new results at the top (reverse order for newest first)
+  const fragment = document.createDocumentFragment();
+  
   result.variants.forEach((v, i) => {
     const clone = template.content.cloneNode(true);
     clone.querySelector(".res-title").textContent =
@@ -179,8 +182,11 @@ export function addResult(result, container = elements.resultsGrid) {
       });
     }
 
-    container.appendChild(clone);
+    fragment.appendChild(clone);
   });
+  
+  // Prepend to container for newest-first ordering
+  container.prepend(fragment);
 }
 
 export function renderHistory(history, onDeleteItem) {
