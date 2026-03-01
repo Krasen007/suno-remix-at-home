@@ -267,9 +267,19 @@ async function deleteHistoryItemUI(timestamp, variantId) {
 async function startRemix() {
   updateUIForRunning(true);
   
+  // Get elements for results grid
+  const elements = getElements();
+  
+  // Clear current results before starting new remix
+  elements.resultsGrid.innerHTML = '<div class="empty-state">Processing... Your remix results will appear here.</div>';
+  
   const success = await startRemixProcess(
     addLog,
-    addResult,
+    (result) => {
+      // Clear the processing message and add results
+      elements.resultsGrid.innerHTML = '';
+      addResult(result);
+    },
     async () => {
       updateUIForRunning(false);
       await refreshCreditsUI();

@@ -85,13 +85,28 @@ export function renderTracks(onTrackUpdate, onTrackRemove) {
 
     fields.forEach((f) => {
       const input = card.querySelector(f.class);
-      const label = input.closest(".form-group")?.querySelector("label") || 
+      const formGroup = input.closest(".form-group");
+      const label = formGroup?.querySelector("label") || 
                     input.closest(".checkbox-label");
       const uniqueId = `track-${track.id}-${f.field}`;
       
       input.id = uniqueId;
-      if (label && label.tagName === "LABEL") {
-        label.setAttribute("for", uniqueId);
+      
+      // Handle label association
+      if (label) {
+        if (label.tagName === "LABEL") {
+          label.setAttribute("for", uniqueId);
+        } else if (label.classList.contains("checkbox-label")) {
+          // For checkbox labels, the input is nested inside the label
+          // so we don't need a for attribute, but ensure proper structure
+          if (!label.contains(input)) {
+            // If input isn't nested, add the for attribute
+            label.setAttribute("for", uniqueId);
+          }
+        }
+      } else {
+        // Debug: Log if label not found
+        console.warn(`Label not found for field: ${f.field}, input:`, input);
       }
 
       if (f.type === "checkbox") {
@@ -120,6 +135,12 @@ export function renderTracks(onTrackUpdate, onTrackRemove) {
 
 export function addResult(result, container = elements.resultsGrid) {
   const template = document.getElementById("result-template");
+  
+  if (!template) {
+    console.error('Result template not found!');
+    return;
+  }
+  
   const fragment = document.createDocumentFragment();
 
   result.variants.forEach((v) => {
