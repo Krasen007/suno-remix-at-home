@@ -66,12 +66,13 @@ POLL_INTERVAL = 30
 TIMEOUT_SECONDS = 600
 
 def get_credits_data(api_key=None):
-    key_to_use = api_key or SUNO_API_KEY
-    if not key_to_use:
+    # Only use user-provided API key, no .env fallback
+    if not api_key:
         return None, "API key not provided"
+    
     try:
         headers = {
-            "Authorization": f"Bearer {key_to_use}",
+            "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
         response = requests.get(f"{BASE_URL}/generate/credit", headers=headers, timeout=REQUEST_TIMEOUT)
@@ -85,12 +86,12 @@ def get_credits_data(api_key=None):
         return None, f"Request failed: {str(e)}"
 
 def submit_track(track, api_key=None):
-    key_to_use = api_key or SUNO_API_KEY
-    if not key_to_use:
+    # Only use user-provided API key, no .env fallback
+    if not api_key:
         return None, "API key not provided"
     
     headers = {
-        "Authorization": f"Bearer {key_to_use}",
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
     
@@ -115,28 +116,6 @@ def submit_track(track, api_key=None):
         logger.error(f"Submit failed: {e}")
         return None, f"Request failed: {str(e)}"
 
-def download_audio(url, filename):
-    os.makedirs("remixes", exist_ok=True)
-    # Sanitize filename
-    safe_name = "".join(c for c in filename if c.isalnum() or c in (" ", "-", "_")).strip()
-    if not safe_name: safe_name = "remix"
-    
-    local_path = os.path.normpath(os.path.join("remixes", f"{safe_name}.mp3"))
-    base_dir = os.path.realpath("remixes")
-    if not os.path.realpath(local_path).startswith(base_dir):
-        logger.error("Attempted path traversal in download_audio")
-        return None, None
-
-    try:
-        res = requests.get(url, timeout=REQUEST_TIMEOUT)
-        res.raise_for_status()
-        with open(local_path, "wb") as f:
-            f.write(res.content)
-        return local_path, f"/remixes/{urllib.parse.quote(safe_name)}.mp3"
-    except (requests.exceptions.RequestException, OSError) as e:
-        logger.error(f"Download failed for {url}: {e}")
-    return None, None
-
 def save_to_history(result):
     with HISTORY_LOCK:
         history = []
@@ -145,9 +124,10 @@ def save_to_history(result):
                 with open(HISTORY_FILE, "r") as f:
                     history = json.load(f)
             except (json.JSONDecodeError, OSError) as e:
-                logger.error(f"History load failed: {e}")
+                logger.error(f"API History load failed: {e}")
                 history = []
         
+        # Add new result to history
         result["timestamp"] = time.time()
         history.insert(0, result)
         
@@ -163,7 +143,11 @@ def save_to_history(result):
             os.replace(temp_file, HISTORY_FILE)
         except OSError as e:
             logger.error(f"History save failed: {e}")
-            if os.path.exists(temp_file): os.remove(temp_file)
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+        
+        # Return history for frontend localStorage storage
+        return history
 
 def push_to_github(file_data, filename):
     if not all([GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO]):
@@ -236,16 +220,9 @@ class RemixHandler(BaseHTTPRequestHandler):
                             history = json.load(f)
                         
                         def delete_variant_file(v):
-                            local_url = v.get("localUrl")
-                            if local_url and local_url.startswith("/remixes/"):
-                                try:
-                                    fname = urllib.parse.unquote(local_url[len("/remixes/"):])
-                                    fpath = os.path.realpath(os.path.join("remixes", fname))
-                                    if fpath.startswith(os.path.realpath("remixes")) and os.path.exists(fpath):
-                                        os.remove(fpath)
-                                        logger.info(f"Deleted local file: {fpath}")
-                                except Exception as e:
-                                    logger.error(f"Failed to delete local file for {local_url}: {e}")
+                            """Delete local file for a variant (legacy function)"""
+                            logger.warning("delete_variant_file called but local files are not supported")
+                            return
 
                         initial_history_len = len(history)
                         new_history = []
@@ -323,13 +300,13 @@ class RemixHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(history).encode())
             return
 
-        # Serve static files from 'www' or 'remixes'
+        # Serve static files from 'www' only
         if decoded_path.startswith('/remixes/'):
-            base_dir = os.path.realpath('remixes')
-            relative_path = decoded_path[len('/remixes/'):]
-        else:
-            base_dir = os.path.realpath('www')
-            relative_path = decoded_path.lstrip('/')
+            self.send_error(404, "Local file serving not supported. Use Suno URLs directly.")
+            return
+
+        base_dir = os.path.realpath('www')
+        relative_path = decoded_path.lstrip('/')
             
         normalized_path = os.path.normpath(relative_path.lstrip('/\\'))
         full_path = os.path.realpath(os.path.join(base_dir, normalized_path))
@@ -438,9 +415,9 @@ class RemixHandler(BaseHTTPRequestHandler):
                 deadline = time.time() + TIMEOUT_SECONDS
                 while time.time() < deadline:
                     try:
-                        key_to_use = api_key or SUNO_API_KEY
+                        # Use user-provided API key only
                         poll_headers = {
-                            "Authorization": f"Bearer {key_to_use}",
+                            "Authorization": f"Bearer {api_key}",
                             "Content-Type": "application/json",
                         }
                         poll = requests.get(f"{BASE_URL}/generate/record-info", params={"taskId": task_id}, headers=poll_headers, timeout=REQUEST_TIMEOUT)
@@ -463,12 +440,20 @@ class RemixHandler(BaseHTTPRequestHandler):
                         updated_variants = []
                         for idx, v in enumerate(variants):
                             fname = f"{track['title']}_v{idx+1}"
-                            path, local_url = download_audio(v['audioUrl'], fname)
-                            v_copy = v.copy()
-                            if local_url:
-                                self._send_sse('log', {'message': f"Saved: {path}", 'level': 'success'})
-                                v_copy["localUrl"] = local_url
-                            updated_variants.append(v_copy)
+                            
+                            # Use Suno's URL directly instead of downloading
+                            if v.get('audioUrl'):
+                                v_copy = v.copy()
+                                v_copy["localUrl"] = v["audioUrl"]  # Direct Suno URL
+                                self._send_sse('log', {'message': f"Using Suno URL: {v['audioUrl']}", 'level': 'info'})
+                                updated_variants.append(v_copy)
+                            else:
+                                # Fallback to download if needed (for non-Suno sources)
+                                path, local_url = download_audio(v.get('fallbackUrl', ''), fname)
+                                if local_url:
+                                    v_copy = v.copy()
+                                    v_copy["localUrl"] = local_url
+                                    updated_variants.append(v_copy)
                         
                         result_payload = {'title': track['title'], 'variants': updated_variants, 'images': images}
                         save_to_history(result_payload)

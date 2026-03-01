@@ -1,4 +1,6 @@
 // State Management Module
+import { saveApiKeyToLocalStorage, loadApiKeyFromLocalStorage, saveHistoryToLocalStorage, loadHistoryFromLocalStorage, mergeHistoryData } from './storage.js';
+
 export const state = {
   tracks: [
     {
@@ -27,10 +29,10 @@ export function loadState() {
     }
     
     // Load API key from localStorage
-    const savedApiKey = localStorage.getItem("suno-api-key");
-    if (savedApiKey) {
-      state.apiKey = savedApiKey;
-    }
+    state.apiKey = loadApiKeyFromLocalStorage();
+    
+    // Load history from localStorage
+    state.history = loadHistoryFromLocalStorage();
   } catch (e) {
     console.warn("Failed to parse saved state, falling back to default", e);
   }
@@ -40,42 +42,51 @@ export function saveState() {
   localStorage.setItem("suno-tracks", JSON.stringify(state.tracks));
 }
 
-export function addTrack() {
-  state.tracks.push({
-    id: Date.now(),
-    title: "",
-    url: "",
-    style: "",
-    prompt: "",
-    customMode: true,
-    instrumental: false,
-  });
-  saveState();
-}
-
-export function removeTrack(id) {
-  if (state.tracks.length <= 1) return;
-  state.tracks = state.tracks.filter((t) => t.id !== id);
-  saveState();
-}
-
-export function updateTrack(id, field, value) {
-  const track = state.tracks.find((t) => t.id === id);
-  if (track) {
-    track[field] = value;
-    saveState();
-  }
+export function setApiKey(apiKey) {
+  state.apiKey = apiKey;
+  saveApiKeyToLocalStorage(apiKey);
 }
 
 export function setRunning(running) {
   state.isRunning = running;
 }
 
-export function setCredits(credits) {
-  state.credits = credits;
+export function addTrack(track = {}) {
+  const newTrack = {
+    id: Date.now().toString(),
+    title: track.title || '',
+    url: track.url || '',
+    uploadUrl: track.uploadUrl || track.url || '',
+    style: track.style || '',
+    prompt: track.prompt || '',
+    customMode: track.customMode !== false,
+    instrumental: track.instrumental === true,
+  };
+  state.tracks.push(newTrack);
+  saveState();
 }
 
-export function setApiKey(apiKey) {
-  state.apiKey = apiKey;
-  localStorage.setItem("suno-api-key", apiKey);
+export function removeTrack(trackId) {
+  if (state.tracks.length <= 1) return;
+  state.tracks = state.tracks.filter((t) => t.id !== trackId);
+  saveState();
+}
+
+export function updateTrack(trackId, updates) {
+  const track = state.tracks.find((t) => t.id === trackId);
+  if (track) {
+    Object.assign(track, updates);
+    saveState();
+  }
+}
+
+export function updateHistory(serverHistory) {
+  // Merge server history with local history
+  state.history = mergeHistoryData(serverHistory, state.history);
+  // Save merged history to localStorage
+  saveHistoryToLocalStorage(state.history);
+}
+
+export function setCredits(credits) {
+  state.credits = credits;
 }

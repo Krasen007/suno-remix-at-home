@@ -38,6 +38,43 @@ body {
     flex-direction: column;
 }
 
+/* URL type indicators */
+.result-url-type {
+  margin: 0.5rem 0;
+  font-size: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.url-indicator {
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.url-indicator[data-url-type="suno"] {
+  background: var(--accent);
+  color: white;
+}
+
+.url-indicator[data-url-type="local"] {
+  background: var(--primary);
+  color: white;
+}
+
+/* Enhanced download button */
+.res-link[data-url-type="suno"] {
+  background: linear-gradient(135deg, var(--accent), var(--primary-glow));
+  border: none;
+}
+
+.res-link[data-url-type="local"] {
+  background: linear-gradient(135deg, var(--primary), var(--primary-glow));
+  border: none;
+}
+
 /* Header */
 header {
     display: flex;

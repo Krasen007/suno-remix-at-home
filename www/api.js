@@ -1,5 +1,5 @@
-// API Interactions Module
-import { state, setCredits } from './state.js';
+// API Module
+import { state, updateHistory, setCredits } from './state.js';
 
 export async function refreshCredits(addLog) {
   try {
@@ -23,7 +23,7 @@ export async function refreshCredits(addLog) {
       addLog(`Failed to fetch credits: ${data.message}`, "error");
     }
   } catch (e) {
-    addLog("Network error fetching credits. Is server running?", "error");
+    addLog(`Network error fetching credits: ${e.message}`, "error");
   }
   return null;
 }
@@ -43,17 +43,21 @@ export async function checkServer() {
 
 export async function loadHistory(addLog) {
   try {
-    const res = await fetch("/api/history");
-    if (!res.ok) {
-      addLog(`History error (${res.status})`, "error");
-      return { error: true, message: `History error (${res.status})` };
+    const response = await fetch("/api/history");
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to load history: ${response.status} - ${errorText}`);
     }
-    const history = await res.json();
-    return history;
-  } catch (e) {
-    console.error("Failed to load history", e);
-    addLog("Network error loading history.", "error");
-    return { error: true, message: "Network error loading history." };
+    
+    const serverHistory = await response.json();
+    
+    // Update state with merged history
+    updateHistory(serverHistory);
+    
+    return { history: state.history, error: null };
+  } catch (err) {
+    addLog(`Failed to load history: ${err.message}`, "error");
+    return { history: [], error: err.message };
   }
 }
 

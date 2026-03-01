@@ -82,9 +82,9 @@ async function checkServerUI() {
 }
 
 async function loadHistoryUI() {
-  const history = await loadHistory(addLog);
-  if (history.error) {
-    showHistoryError(history.message);
+  const { history, error } = await loadHistory(addLog);
+  if (error) {
+    showHistoryError(error);
   } else {
     renderHistory(history);
   }

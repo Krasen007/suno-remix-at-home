@@ -153,10 +153,31 @@ export function addResult(result, container = elements.resultsGrid) {
     
     const audio = clone.querySelector(".res-audio");
     audio.src = v.audioUrl;
+    audio.controls = true;
+    audio.preload = 'metadata';
+    
+    // Add error handling for Suno URLs
+    audio.addEventListener('error', () => {
+      if (v.audioUrl && v.audioUrl.includes('tempfile.aiquickdraw.com')) {
+        console.warn('Suno URL may be expired. Try refreshing.');
+      }
+    });
     
     const link = clone.querySelector(".res-link");
-    link.href = v.audioUrl;
-    link.download = `${v.title || result.title}.mp3`;
+    const isSunoUrl = v.audioUrl && v.audioUrl.includes('tempfile.aiquickdraw.com');
+    
+    // Smart download behavior based on URL type
+    if (isSunoUrl) {
+      link.href = v.audioUrl;  // Direct Suno URL
+      link.textContent = '🌐 Stream from Suno';
+      link.download = '';  // Can't download direct Suno URLs
+      link.setAttribute('data-url-type', 'suno');
+    } else {
+      link.href = v.localUrl || v.audioUrl;  // Local file
+      link.textContent = '💾 Download Local';
+      link.download = `${v.title || result.title}.mp3`;
+      link.setAttribute('data-url-type', 'local');
+    }
     
     // Handle Cover Art
     if (v.imageUrl) {
@@ -193,11 +214,15 @@ export function addResult(result, container = elements.resultsGrid) {
 
 export function renderHistory(history, onDeleteItem) {
   elements.historyGrid.innerHTML = "";
-  if (history.length === 0) {
+  
+  // Ensure history is an array
+  const historyArray = Array.isArray(history) ? history : [];
+  
+  if (historyArray.length === 0) {
     elements.historyGrid.innerHTML = '<div class="empty-state">No past remixes found.</div>';
   } else {
     // Render history in chronological order (oldest first)
-    history.forEach((item) => addResult(item, elements.historyGrid));
+    historyArray.forEach((item) => addResult(item, elements.historyGrid));
   }
 }
 
