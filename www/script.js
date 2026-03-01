@@ -163,7 +163,7 @@ function renderTracks() {
         if (!res.ok) {
            const errText = await res.text();
            let msg = `Error ${res.status}`;
-           try { msg = JSON.parse(errText).message || msg; } catch(e) {}
+           try { msg = JSON.parse(errText).message || msg; } catch(e) { console.debug("Could not parse error response as JSON"); }
            throw new Error(msg);
         }
 
@@ -371,7 +371,7 @@ function startRemix() {
               refreshCredits();
             }
           } catch (e) {
-            // Skip non-json lines
+            console.debug("Skipping non-JSON SSE line");
           }
         }
       }
