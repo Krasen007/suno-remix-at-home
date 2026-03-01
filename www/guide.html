@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
-    <title>Guide | Suno Remix at Home</title>
+    <title>Real-World Guide | Suno Remix at Home</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -28,131 +28,137 @@
       <main>
         <section class="guide-section">
           <div class="guide-content">
-            <h1>Suno Remix at Home - Walkthrough</h1>
-            <p>A professional dashboard and CLI tool to remix your MP3 files using Suno's AI API.</p>
+            <h1>🚀 Real-World Usage Guide</h1>
+            <p>Everything you need to start using Suno Remix at Home effectively in production or daily use.</p>
             
-            <h2>🌟 How It Works</h2>
-            <ol>
-              <li><strong>Hosting</strong>: You host your MP3/WAV files on a public GitHub repository.</li>
-              <li><strong>Request</strong>: You provide the GitHub Raw URL and your desired musical style through the web dashboard.</li>
-              <li><strong>Authentication</strong>: The server uses your Suno API Key to submit a "cover" request.</li>
-              <li><strong>Processing</strong>: Suno's AI generates multiple remix variants.</li>
-              <li><strong>Streaming</strong>: The server polls the API and streams live logs to your browser.</li>
-              <li><strong>Archiving</strong>: Completed remixes are automatically downloaded to your local <code>remixes/</code> folder and saved to <code>history.json</code> for permanent access.</li>
-            </ol>
-            
-            <h2>🛠️ Step-by-Step Setup</h2>
-            <h3>1. Environment Activation</h3>
-            <div class="code-block">
-              <pre><code>.venv\Scripts\Activate.ps1
-pip install -r requirements.txt</code></pre>
+            <h2>� 5-Minute Quick Start</h2>
+            <div class="quick-start">
+              <div class="step">
+                <h3>1️⃣ Start the Server</h3>
+                <div class="code-block">
+                  <pre><code>python server.py</code></pre>
+                </div>
+                <p>Open your browser and visit <strong>http://localhost:5000</strong></p>
+              </div>
+              
+              <div class="step">
+                <h3>2️⃣ Add Your API Key</h3>
+                <p>The first time you visit, you'll see a welcome modal. Just paste your Suno API key and click Save.</p>
+                <div class="tip-box">
+                  <p><strong>💡 Pro Tip:</strong> Your key is stored locally and never sent to any server.</p>
+                </div>
+              </div>
+              
+              <div class="step">
+                <h3>3️⃣ Add Your Audio</h3>
+                <p>Paste any public audio URL (GitHub, Dropbox, etc.) or use the upload button for GitHub integration.</p>
+              </div>
+              
+              <div class="step">
+                <h3>4️⃣ Start Remixing</h3>
+                <p>Click "🎵 Start Remix" and watch the real-time progress in your browser.</p>
+              </div>
             </div>
             
-            <h3>2. API Key Configuration</h3>
-            <p>You have <strong>two options</strong> for managing your Suno API key:</p>
-            
-            <h4>Option A: GUI Configuration (Recommended)</h4>
-            <ol>
-              <li>Start the server and visit <strong><a href="http://localhost:5000">http://localhost:5000</a></strong></li>
-              <li>Enter your Suno API key in the <strong>"Suno API Key"</strong> field in the Configuration section</li>
-              <li>Click <strong>"💾 Save"</strong> or press Enter</li>
-              <li>Your key is stored locally in your browser and automatically used for all API calls</li>
-              <li>Credits automatically refresh when you save a new key</li>
-            </ol>
-            
-            <h4>Option B: Environment Variable (Traditional)</h4>
-            <p>Obtain your key from <a href="https://sunoapi.org">sunoapi.org</a> and add it to your <code>.env</code> file:</p>
-            <div class="code-block">
-              <pre><code>SUNO_API_KEY=your_key_here</code></pre>
-            </div>
-            
-            <div class="warning-box">
-              <p><strong>⚠️ SECURITY WARNING</strong>: Your <code>.env</code> file contains sensitive API keys and <strong>MUST NEVER</strong> be committed to version control (Git).</p>
+            <h2>🔑 Understanding API Keys</h2>
+            <div class="reality-check">
+              <h3>✅ What You Need</h3>
               <ul>
-                <li>Ensure <code>.env</code> is listed in your <code>.gitignore</code>.</li>
-                <li>If you accidentally expose your key, rotate/regenerate it immediately on <a href="https://sunoapi.org">sunoapi.org</a>.</li>
-                <li>For production environments, use a secure secret manager.</li>
+                <li><strong>Just a Suno API key</strong> from <a href="https://sunoapi.org" target="_blank">sunoapi.org</a></li>
+                <li><strong>No GitHub token</strong> required for basic usage</li>
+                <li><strong>Browser storage</strong> keeps your key private and secure</li>
               </ul>
-              <p><strong>GUI Storage</strong>: When using the GUI option, your API key is stored in your browser's localStorage and never transmitted to the server except for API requests.</p>
+              
+              <h3>❌ What You Don't Need</h3>
+              <ul>
+                <li><strong>Environment variables</strong> (unless you're an advanced user)</li>
+                <li><strong>Server configuration</strong> files</li>
+                <li><strong>GitHub token</strong> for basic remixing</li>
+                <li><strong>Complex setup</strong> processes</li>
+              </ul>
             </div>
             
-            <h3>3. Audio Preparation</h3>
-            <p>The Suno API requires a public URL to download your source audio. You have two ways to provide this:</p>
-            
-            <h4>Option A: Dashboard Upload (Recommended)</h4>
-            <p>Go to GitHub Settings > Developer Settings > Personal Access Tokens (Tokens classic) and generate a token with the repo scope.</p>
-            <ol>
-              <li>Configure your GitHub details in <code>.env</code> (<code>GITHUB_TOKEN</code>, <code>GITHUB_OWNER</code>, etc.).</li>
-              <li>In the Web Dashboard, click the <strong>"📤 Upload"</strong> button next to the Audio URL field.</li>
-              <li>Select your local MP3/WAV file.</li>
-              <li>The server will automatically host it on GitHub and fill in the URL for you.</li>
-            </ol>
-            
-            <h4>Option B: Manual GitHub Hosting</h4>
-            <ol>
-              <li>Upload your MP3 to a public GitHub repo manually.</li>
-              <li>Click the file, then click <strong>"Raw"</strong>.</li>
-              <li>Copy the URL (it should look like <code>https://raw.githubusercontent.com/...</code>).</li>
-            </ol>
-            
-            <h3>4. Launching the Dashboard</h3>
-            <p>Start the local development server:</p>
-            <div class="code-block">
-              <pre><code>python server.py</code></pre>
+            <h2>🎵 Audio Hosting Options</h2>
+            <div class="hosting-options">
+              <div class="option">
+                <h3>🌐 Option 1: Any Public URL</h3>
+                <p>Upload to Dropbox, Google Drive, personal website, or any public hosting service.</p>
+                <div class="code-block">
+                  <pre><code>1. Upload file anywhere
+2. Copy public URL
+3. Paste in "Audio URL" field</code></pre>
+                </div>
+              </div>
+              
+              <div class="option">
+                <h3>🐙 Option 2: GitHub Integration</h3>
+                <p>Automatic hosting with GitHub integration (optional but convenient).</p>
+                <div class="code-block">
+                  <pre><code>1. Create GitHub token
+2. Add to .env file
+3. Use upload button in interface</code></pre>
+                </div>
+                <div class="tip-box">
+                  <p><strong>💡 Note:</strong> This is optional - you can use any hosting service!</p>
+                </div>
+              </div>
+              
+              <div class="option">
+                <h3>💾 Option 3: Local Files Only</h3>
+                <p>Process files locally without any hosting setup.</p>
+                <div class="code-block">
+                  <pre><code>1. Leave "Audio URL" field empty
+2. Files save to remixes/ folder
+3. Manual download when complete</code></pre>
+                </div>
+              </div>
             </div>
-            <p>Visit <strong><a href="http://localhost:5000">http://localhost:5000</a></strong> to access the interface.</p>
             
-            <h2>🖥️ Using Dashboard</h2>
-            <h3>Configuration Section</h3>
-            <ul>
-              <li><strong>API Key Management</strong>: Enter and save your Suno API key directly in the interface</li>
-              <li><strong>Add Tracks</strong>: Increase the number of tracks to process in a single session</li>
-              <li><strong>Track Settings</strong>:
-                <ul>
-                  <li><strong>Title</strong>: What the remix will be named</li>
-                  <li><strong>Audio URL</strong>: GitHub raw URL or use the upload button</li>
-                  <li><strong>Style</strong>: Comma-separated descriptors (e.g., <code>80s synth, upbeat, high energy</code>)</li>
-                  <li><strong>Lyrics/Prompt</strong>: Instructions for the AI remix</li>
-                  <li><strong>Toggles</strong>: Enable "Custom Mode" or "Instrumental" as needed</li>
-                </ul>
-              </li>
-            </ul>
+            <h2>🎛️ Common Use Cases</h2>
+            <div class="use-cases">
+              <div class="case">
+                <h3>🎧 Music Producers</h3>
+                <p>Upload stems, create multiple remix variants, build a library of your productions.</p>
+              </div>
+              
+              <div class="case">
+                <h3>🎤 Content Creators</h3>
+                <p>Quickly generate background music for videos, podcasts, or social media content.</p>
+              </div>
+              
+              <div class="case">
+                <h3>🎹 DJs & Remix Artists</h3>
+                <p>Create remixes for live sets, experiment with different styles and energies.</p>
+              </div>
+              
+              <div class="case">
+                <h3>🎓 Hobbyists</h3>
+                <p>Remix personal songs, create custom versions, experiment with AI music generation.</p>
+              </div>
+            </div>
             
-            <h3>Real-time Features</h3>
-            <ul>
-              <li><strong>Credits Badge</strong>: Shows your current Suno API balance (auto-refreshes when API key changes)</li>
-              <li><strong>Server Status</strong>: Displays connection status to the backend</li>
-              <li><strong>Terminal Output</strong>: Monitor "PENDING" → "TEXT_SUCCESS" → "SUCCESS" statuses in real-time</li>
-              <li><strong>Live Streaming</strong>: Watch progress updates without page refresh</li>
-            </ul>
+            <h2>⚡ Performance Tips</h2>
+            <div class="tips">
+              <div class="tip">
+                <h3>🚀 Speed</h3>
+                <p>Process multiple tracks in parallel for faster workflows.</p>
+              </div>
+              
+              <div class="tip">
+                <h3>💾 Storage</h3>
+                <p>Your browser localStorage keeps history forever - no server setup needed.</p>
+              </div>
+              
+              <div class="tip">
+                <h3>🔄 Reliability</h3>
+                <p>Local downloads protect against expired Suno links (15-day limit).</p>
+              </div>
+            </div>
             
-            <h3>Results & History</h3>
-            <ul>
-              <li><strong>Current Results</strong>: Play and download completed remix variants immediately</li>
-              <li><strong>Cover Art</strong>: View generated artwork alongside audio variants</li>
-              <li><strong>Local History</strong>: Access all past remixes from the archive below main results</li>
-              <li><strong>Persistent Storage</strong>: Files saved to <code>remixes/</code> folder and <code>history.json</code> for permanent access</li>
-            </ul>
-            
-            <h2>📂 Project Structure</h2>
-            <ul>
-              <li><code>server.py</code>: The lightweight Python server (no Flask/Node dependencies).</li>
-              <li><code>remix.py</code>: Standalone CLI script for automated jobs.</li>
-              <li><code>www/</code>: The pure JavaScript frontend.</li>
-              <li><code>remixes/</code>: Your permanent local audio library.</li>
-              <li><code>history.json</code>: The local data store for your persistent archive.</li>
-            </ul>
-            
-            <h2>⚠️ Important Limitations</h2>
-            <ul>
-              <li><strong>Credit Requirements</strong>: Each remix consumes Suno API credits. Check your balance via the "Credits" badge in the UI.</li>
-              <li><strong>Link Expiration</strong>: Remote audio links from Suno usually expire after 15 days. <strong>Suno Remix At Home</strong> solves this by automatically downloading the files for you.</li>
-              <li><strong>GitHub Limits</strong>: Ensure your source file is under 100MB per GitHub's standard limits.</li>
-            </ul>
-            
-            <div class="footer-note">
-              <hr>
-              <p><em>Powered by Suno API | Built with Vanilla JS & Python</em></p>
+            <div class="reality-box">
+              <h3>🎯 The Bottom Line</h3>
+              <p><strong>Start with just your Suno API key and a browser.</strong> Everything else is optional customization for your specific workflow.</p>
+              <p>The web interface is designed for immediate, real-world usage - not complex setup.</p>
             </div>
           </div>
         </section>
