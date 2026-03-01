@@ -22,6 +22,18 @@ pip install -r requirements.txt
 
 ### 2. API Key Configuration
 
+You have **two options** for managing your Suno API key:
+
+#### Option A: GUI Configuration (Recommended)
+
+1. Start the server and visit **[http://localhost:5000](http://localhost:5000)**
+2. Enter your Suno API key in the **"Suno API Key"** field in the Configuration section
+3. Click **"💾 Save"** or press Enter
+4. Your key is stored locally in your browser and automatically used for all API calls
+5. Credits automatically refresh when you save a new key
+
+#### Option B: Environment Variable (Traditional)
+
 Obtain your key from [sunoapi.org](https://sunoapi.org) and add it to your `.env` file:
 
 ```env
@@ -34,6 +46,8 @@ SUNO_API_KEY=your_key_here
 > - Ensure `.env` is listed in your `.gitignore`.
 > - If you accidentally expose your key, rotate/regenerate it immediately on [sunoapi.org](https://sunoapi.org).
 > - For production environments, use a secure secret manager.
+> 
+> **GUI Storage**: When using the GUI option, your API key is stored in your browser's localStorage and never transmitted to the server except for API requests.
 
 ### 3. Audio Preparation
 
@@ -64,16 +78,29 @@ python server.py
 
 Visit **[http://localhost:5000](http://localhost:5000)** to access the interface.
 
-## 🖥️ Using the Dashboard
+## 🖥️ Using Dashboard
 
-- **Add Tracks**: Increase the number of tracks to process in a single session.
-- **Config Settings**:
-  - **Title**: What the remix will be named.
-  - **Lyrics**: Input the lyrics or instructions for the remix.
-  - **Style**: Comma-separated descriptors (e.g., `80s synth, upbeat, high energy`).
-  - **Toggles**: Enable "Custom Mode" or "Instrumental" as needed.
-- **Terminal Output**: Monitor the "PENDING" and "SUCCESS" statuses in real-time.
-- **Local History**: Play back old remixes from the archive below the main results.
+### Configuration Section
+- **API Key Management**: Enter and save your Suno API key directly in the interface
+- **Add Tracks**: Increase the number of tracks to process in a single session
+- **Track Settings**:
+  - **Title**: What the remix will be named
+  - **Audio URL**: GitHub raw URL or use the upload button
+  - **Style**: Comma-separated descriptors (e.g., `80s synth, upbeat, high energy`)
+  - **Lyrics/Prompt**: Instructions for the AI remix
+  - **Toggles**: Enable "Custom Mode" or "Instrumental" as needed
+
+### Real-time Features
+- **Credits Badge**: Shows your current Suno API balance (auto-refreshes when API key changes)
+- **Server Status**: Displays connection status to the backend
+- **Terminal Output**: Monitor "PENDING" → "TEXT_SUCCESS" → "SUCCESS" statuses in real-time
+- **Live Streaming**: Watch progress updates without page refresh
+
+### Results & History
+- **Current Results**: Play and download completed remix variants immediately
+- **Cover Art**: View generated artwork alongside audio variants
+- **Local History**: Access all past remixes from the archive below main results
+- **Persistent Storage**: Files saved to `remixes/` folder and `history.json` for permanent access
 
 ## 📂 Project Structure
 

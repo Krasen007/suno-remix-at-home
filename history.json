@@ -1,5 +1,83 @@
 [
   {
+    "title": "Fairytale Instrumental",
+    "variants": [
+      {
+        "id": "dcc1d9cd-6b3b-4822-90b6-99ad0a092ece",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/8fb69c385fd54f2288a8651791033841.mp3",
+        "sourceAudioUrl": "https://cdn1.suno.ai/dcc1d9cd-6b3b-4822-90b6-99ad0a092ece.mp3",
+        "streamAudioUrl": "https://musicfile.removeai.ai/ZGNjMWQ5Y2QtNmIzYi00ODIyLTkwYjYtOTlhZDBhMDkyZWNl",
+        "sourceStreamAudioUrl": "https://cdn1.suno.ai/dcc1d9cd-6b3b-4822-90b6-99ad0a092ece.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/ZGNjMWQ5Y2QtNmIzYi00ODIyLTkwYjYtOTlhZDBhMDkyZWNl.jpeg",
+        "sourceImageUrl": "https://cdn2.suno.ai/image_dcc1d9cd-6b3b-4822-90b6-99ad0a092ece.jpeg",
+        "prompt": "",
+        "modelName": "chirp-crow",
+        "title": "Fairytale Instrumental",
+        "tags": "Bard, Classical, Instrumental, Rock guitar solo, Epic outro.",
+        "createTime": 1772376208912,
+        "duration": 241.36,
+        "localUrl": "/remixes/Fairytale%20Instrumental_v1.mp3"
+      },
+      {
+        "id": "6eff4904-5d79-4a05-b295-1d50e6441f6c",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/67268a23bf1c444a82b91214a49ee7dd.mp3",
+        "sourceAudioUrl": "https://cdn1.suno.ai/6eff4904-5d79-4a05-b295-1d50e6441f6c.mp3",
+        "streamAudioUrl": "https://musicfile.removeai.ai/NmVmZjQ5MDQtNWQ3OS00YTA1LWIyOTUtMWQ1MGU2NDQxZjZj",
+        "sourceStreamAudioUrl": "https://cdn1.suno.ai/6eff4904-5d79-4a05-b295-1d50e6441f6c.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/NmVmZjQ5MDQtNWQ3OS00YTA1LWIyOTUtMWQ1MGU2NDQxZjZj.jpeg",
+        "sourceImageUrl": "https://cdn2.suno.ai/image_6eff4904-5d79-4a05-b295-1d50e6441f6c.jpeg",
+        "prompt": "",
+        "modelName": "chirp-crow",
+        "title": "Fairytale Instrumental",
+        "tags": "Bard, Classical, Instrumental, Rock guitar solo, Epic outro.",
+        "createTime": 1772376208912,
+        "duration": 248.88,
+        "localUrl": "/remixes/Fairytale%20Instrumental_v2.mp3"
+      }
+    ],
+    "images": [],
+    "timestamp": 1772376219.339184
+  },
+  {
+    "title": "Fairytale Original",
+    "variants": [
+      {
+        "id": "e8a2d66b-7e7d-42ef-8d4a-bb9542eef7a9",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/ef43863d33bb462cb268d38ae86e276a.mp3",
+        "sourceAudioUrl": "https://cdn1.suno.ai/e8a2d66b-7e7d-42ef-8d4a-bb9542eef7a9.mp3",
+        "streamAudioUrl": "https://musicfile.removeai.ai/ZThhMmQ2NmItN2U3ZC00MmVmLThkNGEtYmI5NTQyZWVmN2E5",
+        "sourceStreamAudioUrl": "https://cdn1.suno.ai/e8a2d66b-7e7d-42ef-8d4a-bb9542eef7a9.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/ZThhMmQ2NmItN2U3ZC00MmVmLThkNGEtYmI5NTQyZWVmN2E5.jpeg",
+        "sourceImageUrl": "https://cdn2.suno.ai/image_e8a2d66b-7e7d-42ef-8d4a-bb9542eef7a9.jpeg",
+        "prompt": "",
+        "modelName": "chirp-crow",
+        "title": "Fairytale Original",
+        "tags": "Bard, Fairytale, Castle, Magical, Frosty, Princess, Prince, Love",
+        "createTime": 1772375192128,
+        "duration": 161.4,
+        "localUrl": "/remixes/Fairytale%20Original_v1.mp3"
+      },
+      {
+        "id": "f8fe7fbd-8a58-41a0-b807-ff0b36da953b",
+        "audioUrl": "https://tempfile.aiquickdraw.com/r/604279f1ff9a48198e7005b0e0157bcf.mp3",
+        "sourceAudioUrl": "https://cdn1.suno.ai/f8fe7fbd-8a58-41a0-b807-ff0b36da953b.mp3",
+        "streamAudioUrl": "https://musicfile.removeai.ai/ZjhmZTdmYmQtOGE1OC00MWEwLWI4MDctZmYwYjM2ZGE5NTNi",
+        "sourceStreamAudioUrl": "https://cdn1.suno.ai/f8fe7fbd-8a58-41a0-b807-ff0b36da953b.mp3",
+        "imageUrl": "https://musicfile.removeai.ai/ZjhmZTdmYmQtOGE1OC00MWEwLWI4MDctZmYwYjM2ZGE5NTNi.jpeg",
+        "sourceImageUrl": "https://cdn2.suno.ai/image_f8fe7fbd-8a58-41a0-b807-ff0b36da953b.jpeg",
+        "prompt": "",
+        "modelName": "chirp-crow",
+        "title": "Fairytale Original",
+        "tags": "Bard, Fairytale, Castle, Magical, Frosty, Princess, Prince, Love",
+        "createTime": 1772375192128,
+        "duration": 197.4,
+        "localUrl": "/remixes/Fairytale%20Original_v2.mp3"
+      }
+    ],
+    "images": [],
+    "timestamp": 1772375214.544838
+  },
+  {
     "title": "Fairytale Solo From API",
     "timestamp": 1772309555.0,
     "images": [],

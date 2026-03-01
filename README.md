@@ -22,7 +22,8 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # 2. Set your API key
-# Copy .env.example to .env and paste your SUNO_API_KEY
+# Option A: GUI (Recommended) - Enter directly in the web interface
+# Option B: Environment - Copy .env.example to .env and paste your SUNO_API_KEY
 
 # 3. Start the Web Server
 python server.py
@@ -32,13 +33,29 @@ Open your browser to: **[http://localhost:5000](http://localhost:5000)**
 
 ## ✨ Dashboard Features
 
-- **Dynamic Track Management**: Add and configure multiple tracks without touching code.
-- **Custom Mode & Instrumentals**: Full control over Suno's generation parameters.
-- **Real-time Terminal**: Watch the API polling and download progress live.
-- **Cover Art**: View generated artwork alongside your variants.
-- **Local Persistence**:
-  - **Auto-Download**: Files are saved to the `remixes/` folder automatically.
-  - **History**: Local history is stored in `history.json`, allowing playback even after API links expire.
+### API Key Management
+- **GUI Configuration**: Enter and save your Suno API key directly in the web interface
+- **Secure Storage**: API key stored locally in browser localStorage
+- **Auto-Refresh**: Credits automatically update when you change your API key
+- **Fallback Support**: Still supports traditional `.env` file configuration
+
+### Dynamic Track Management
+- **Multi-Track Processing**: Add and configure multiple tracks in a single session
+- **Custom Mode & Instrumentals**: Full control over Suno's generation parameters
+- **File Upload**: Direct upload to GitHub integration for easy audio hosting
+- **Real-time Validation**: Instant feedback on track configuration
+
+### Real-time Monitoring
+- **Live Terminal**: Watch the API polling and download progress live
+- **Status Updates**: Track "PENDING" → "TEXT_SUCCESS" → "SUCCESS" progression
+- **Credits Display**: Current Suno API balance always visible
+- **Server Health**: Connection status indicator
+
+### Local Persistence
+- **Auto-Download**: Files are saved to the `remixes/` folder automatically
+- **Cover Art**: View generated artwork alongside your variants
+- **History Browser**: Local history stored in `history.json` for permanent access
+- **Expired Link Protection**: Play your local copies even after API links expire (15 days)
 
 ## 💾 Requirements
 
