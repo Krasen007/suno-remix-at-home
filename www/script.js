@@ -33,7 +33,7 @@ function init() {
   }
   
   // Initial render
-  renderTracks(updateTrack, removeTrack, null);
+  renderTracks(handleTrackUpdate, removeTrack, null);
   checkServerUI();
   loadHistoryUI();
   
@@ -67,12 +67,9 @@ function showApiKeyPrompt() {
           <li>Copy the key and paste it below</li>
         </ol>
       </div>
-      <div class="api-key-input-group">
-        <input type="password" id="welcome-api-key" placeholder="Enter your Suno API key..." class="api-key-input">
-        <button id="welcome-save-key" class="btn btn-primary">Save API Key</button>
-      </div>
       <div class="modal-footer">
         <small>Your API key will be stored locally in your browser only.</small>
+        <button id="welcome-close-modal" class="btn btn-secondary">Close</button>
       </div>
     </div>
   `;
@@ -151,37 +148,22 @@ function showApiKeyPrompt() {
       text-decoration: underline;
     }
     
-    .api-key-input-group {
-      display: flex;
-      gap: 0.5rem;
-      margin: 1.5rem 0;
-    }
-    
-    .api-key-input-group input {
-      flex: 1;
-      background: #2a2a2a;
-      border: 1px solid #444;
-      color: #ffffff;
-      padding: 0.75rem;
-      border-radius: 6px;
-    }
-    
-    .api-key-input-group input::placeholder {
-      color: #888888;
-    }
-    
-    .api-key-input-group input:focus {
-      outline: none;
-      border-color: #4a9eff;
-    }
-    
     .modal-footer {
-      margin-top: 1rem;
+      margin-top: 2rem;
       text-align: center;
+      padding: 1rem 0;
     }
     
     .modal-footer small {
       color: #888888;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    
+    #welcome-close-modal {
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      min-width: 120px;
     }
   `;
   
@@ -202,8 +184,23 @@ function showApiKeyPrompt() {
   
   document.addEventListener('keydown', handleEscapeKey);
   
-  // Focus input
-  document.getElementById('welcome-api-key').focus();
+  // Add close button handler
+  document.getElementById('welcome-close-modal').addEventListener('click', () => {
+    document.body.removeChild(modal);
+    document.head.removeChild(style);
+    // Restore focus to previously focused element
+    if (document.activeElement && document.activeElement !== document.body) {
+      document.activeElement.focus();
+    }
+  });
+  
+  // Focus close button
+  document.getElementById('welcome-close-modal').focus();
+}
+
+// Track update handler
+function handleTrackUpdate(trackId, field, value) {
+  updateTrack(trackId, { [field]: value });
 }
 
 // Event Listeners Setup
@@ -212,7 +209,7 @@ function setupEventListeners() {
   
   elements.addTrackBtn.addEventListener("click", () => {
     addTrack();
-    renderTracks(updateTrack, removeTrack, null);
+    renderTracks(handleTrackUpdate, removeTrack, null);
   });
 
   elements.runBtn.addEventListener("click", startRemix);
