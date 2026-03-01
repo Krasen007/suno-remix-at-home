@@ -1,0 +1,1 @@
+do i need .env if i store the api key in the localStorage? if i want to publish the application to a hosting, what is the best way to handle the backend?

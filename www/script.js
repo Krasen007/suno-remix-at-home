@@ -32,7 +32,7 @@ function init() {
   loadHistoryUI();
   
   // Setup API key handlers
-  setupApiKeyHandlers(setApiKey, addLog);
+  setupApiKeyHandlers(setApiKey, addLog, refreshCreditsUI);
   
   // Setup event listeners
   setupEventListeners();

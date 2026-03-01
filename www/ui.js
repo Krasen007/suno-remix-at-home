@@ -196,14 +196,15 @@ export function showHistoryError(message) {
   elements.historyGrid.innerHTML = `<div class="empty-state">${message}</div>`;
 }
 
-export function setupApiKeyHandlers(setApiKey, addLog) {
+export function setupApiKeyHandlers(setApiKey, addLog, refreshCreditsUI) {
   // Load saved API key into input
   if (state.apiKey) {
     elements.apiKeyInput.value = state.apiKey;
   }
 
   // Handle save button click
-  elements.saveApiKeyBtn.addEventListener('click', () => {
+  elements.saveApiKeyBtn.addEventListener('click', (e) => {
+    e.preventDefault(); // Prevent form submission
     const apiKey = elements.apiKeyInput.value.trim();
     if (!apiKey) {
       addLog('Please enter an API key', 'error');
@@ -212,6 +213,9 @@ export function setupApiKeyHandlers(setApiKey, addLog) {
     
     setApiKey(apiKey);
     addLog('API key saved successfully', 'success');
+    
+    // Auto-refresh credits after saving new API key
+    refreshCreditsUI();
   });
 
   // Handle Enter key in input

@@ -30,7 +30,7 @@ export async function refreshCredits(addLog) {
 
 export async function checkServer() {
   try {
-    const res = await fetch("/api/credits");
+    const res = await fetch("/api/health");
     if (res.ok) {
       return { status: "connected", text: "Server: Connected", color: "var(--primary)" };
     } else {
