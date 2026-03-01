@@ -75,7 +75,6 @@ If you prefer the command line, you can still use the standalone script:
 
 - `remixes/` - Your downloaded MP3 files (permanent).
 - `history.json` - Complete local archive of your remix sessions.
-- `remix_results.json` - Raw API output from the latest CLI run.
 
 ---
 

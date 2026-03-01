@@ -152,9 +152,9 @@ def download_remix(audio_url, filename):
 
 def save_results(results):
     """Save results to remix_results.json."""
-    with open("remix_results.json", "w") as f:
-        json.dump(results, f, indent=2)
-    print(f"[OUTPUT] Results saved to remix_results.json")
+    # File saving removed - results now handled via web interface
+    print(f"[OUTPUT] Results available via web interface")
+    pass
 
 
 def main():
