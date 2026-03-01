@@ -438,8 +438,9 @@ class RemixHandler(BaseHTTPRequestHandler):
                 deadline = time.time() + TIMEOUT_SECONDS
                 while time.time() < deadline:
                     try:
+                        key_to_use = api_key or SUNO_API_KEY
                         poll_headers = {
-                            "Authorization": f"Bearer {api_key}",
+                            "Authorization": f"Bearer {key_to_use}",
                             "Content-Type": "application/json",
                         }
                         poll = requests.get(f"{BASE_URL}/generate/record-info", params={"taskId": task_id}, headers=poll_headers, timeout=REQUEST_TIMEOUT)

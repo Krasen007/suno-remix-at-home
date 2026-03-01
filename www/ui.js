@@ -141,31 +141,28 @@ export function renderTracks(onTrackUpdate, onTrackRemove, onFileUpload) {
 }
 
 export function addResult(result, container = elements.resultsGrid) {
-  // Clear empty state if first result
-  if (container.querySelector(".empty-state")) {
-    container.innerHTML = "";
-  }
-
   const template = document.getElementById("result-template");
-
-  // Insert new results at the top (reverse order for newest first)
   const fragment = document.createDocumentFragment();
-  
-  result.variants.forEach((v, i) => {
+
+  result.variants.forEach((v) => {
     const clone = template.content.cloneNode(true);
-    clone.querySelector(".res-title").textContent =
-      `${result.title} (v${i + 1})`;
+    
+    // Update result content
+    clone.querySelector(".res-title").textContent = v.title || result.title;
     clone.querySelector(".res-dur").textContent = v.duration || "--";
     
-    // Prioritize local URL for playback if it exists
-    clone.querySelector(".res-audio").src = v.localUrl || v.audioUrl;
-    clone.querySelector(".res-link").href = v.audioUrl;
-
-    // Display cover art
-    const img = clone.querySelector(".res-image");
-    const imageUrl = v.imageUrl || (result.images && result.images[i]) || (result.images && result.images[0]);
-    if (imageUrl) {
-      img.src = imageUrl;
+    const audio = clone.querySelector(".res-audio");
+    audio.src = v.audioUrl;
+    
+    const link = clone.querySelector(".res-link");
+    link.href = v.audioUrl;
+    link.download = `${v.title || result.title}.mp3`;
+    
+    // Handle Cover Art
+    if (v.imageUrl) {
+      const img = clone.querySelector(".res-image");
+      img.src = v.imageUrl;
+      img.alt = `${v.title || result.title} cover art`;
       img.classList.remove("hidden");
     }
 
@@ -185,8 +182,13 @@ export function addResult(result, container = elements.resultsGrid) {
     fragment.appendChild(clone);
   });
   
-  // Prepend to container for newest-first ordering
-  container.prepend(fragment);
+  // For current results: prepend (newest first)
+  // For history: append (chronological order)
+  if (container === elements.resultsGrid) {
+    container.prepend(fragment);
+  } else {
+    container.appendChild(fragment);
+  }
 }
 
 export function renderHistory(history, onDeleteItem) {
@@ -194,6 +196,7 @@ export function renderHistory(history, onDeleteItem) {
   if (history.length === 0) {
     elements.historyGrid.innerHTML = '<div class="empty-state">No past remixes found.</div>';
   } else {
+    // Render history in chronological order (oldest first)
     history.forEach((item) => addResult(item, elements.historyGrid));
   }
 }

@@ -116,6 +116,14 @@ export async function startRemixSession(tracks, onLog, onResult, onDone, onError
       body: JSON.stringify({ tracks, apiKey: state.apiKey }),
     });
 
+    if (!response.ok) {
+      const errorBody = await response.text();
+      const errorMessage = `Server error: ${response.status} - ${errorBody}`;
+      onLog(errorMessage, "error");
+      onError(errorMessage);
+      return;
+    }
+
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let sseBuffer = "";
@@ -133,36 +141,25 @@ export async function startRemixSession(tracks, onLog, onResult, onDone, onError
             onDone();
           }
         } catch (e) {
-          console.debug("Skipping non-JSON SSE line");
+          onLog(`SSE parse error: ${e.message}`, "error");
         }
       }
     }
 
-    function readChunk() {
-      reader.read().then(({ done, value }) => {
-        if (done) {
-          // Process any remaining partial line
-          if (sseBuffer && sseBuffer.startsWith("data: ")) {
-             processLine(sseBuffer);
-          }
-          return;
-        }
-
-        sseBuffer += decoder.decode(value, { stream: true });
-        const lines = sseBuffer.split("\n");
-        
-        // Keep the last segment in buffer (it might be incomplete)
-        sseBuffer = lines.pop();
-
-        lines.forEach(processLine);
-        readChunk();
-      });
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      
+      sseBuffer += decoder.decode(value, { stream: true });
+      const lines = sseBuffer.split("\n");
+      sseBuffer = lines.pop() || "";
+      
+      for (const line of lines) {
+        if (line.trim()) processLine(line);
+      }
     }
-
-    readChunk();
-    return true;
   } catch (err) {
-    onError(`Connection error: ${err.message}`);
-    return false;
+    addLog(`Connection error: ${err.message}`, "error");
+    onError(err.message);
   }
 }

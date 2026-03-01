@@ -34,10 +34,11 @@ Open your browser to: **[http://localhost:5000](http://localhost:5000)**
 ## ✨ Dashboard Features
 
 ### API Key Management
-- **GUI Configuration**: Enter and save your Suno API key directly in the web interface
-- **Secure Storage**: API key stored locally in browser localStorage
-- **Auto-Refresh**: Credits automatically update when you change your API key
-- **Fallback Support**: Still supports traditional `.env` file configuration
+- **Backend-First Security**: API keys are handled server-side with environment variables
+- **Secure Proxy**: Frontend calls your backend, which securely manages Suno API keys
+- **Session-Based Auth**: Use httpOnly, Secure cookies or server-side sessions
+- **Environment Variables**: Configure keys in `.env` file (never commit to VCS)
+- **No Client Exposure**: Raw API keys are never sent to the browser
 
 ### Dynamic Track Management
 - **Multi-Track Processing**: Add and configure multiple tracks in a single session
