@@ -107,30 +107,8 @@ export function renderTracks(onTrackUpdate, onTrackRemove, onFileUpload) {
       }
     });
 
-    // Handle file upload
-    const uploadBtn = card.querySelector(".upload-btn");
-    const fileInput = card.querySelector(".file-input");
-    const urlInput = card.querySelector(".track-url");
-
-    uploadBtn.addEventListener("click", () => fileInput.click());
-
-    fileInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      uploadBtn.disabled = true;
-      uploadBtn.textContent = "Uploading...";
-      
-      const url = await onFileUpload(file, track.id);
-      
-      uploadBtn.disabled = false;
-      uploadBtn.textContent = "📤 Upload";
-      fileInput.value = "";
-      
-      if (url) {
-        urlInput.value = url;
-      }
-    });
+    // File upload functionality removed - no upload button available
+    // Users should use any public hosting service and paste URLs directly
 
     card
       .querySelector(".remove-track")

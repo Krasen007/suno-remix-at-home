@@ -1,7 +1,7 @@
 // Main Application Orchestration
 import { loadState, addTrack, removeTrack, updateTrack, setApiKey, state } from './state.js';
 import { refreshCredits, checkServer, loadHistory, deleteHistoryItem } from './api.js';
-import { 
+import {
   initializeElements, 
   getElements, 
   addLog, 
@@ -9,12 +9,11 @@ import {
   updateServerStatus, 
   updateUIForRunning,
   renderTracks,
-  addResult,
+  renderResults,
   renderHistory,
   showHistoryError,
   setupApiKeyHandlers
 } from './ui.js';
-import { handleFileUpload } from './upload.js';
 import { startRemixProcess } from './remix.js';
 
 // Initialize application
@@ -34,7 +33,7 @@ function init() {
   }
   
   // Initial render
-  renderTracks(updateTrack, removeTrack, handleFileUploadWithLog);
+  renderTracks(updateTrack, removeTrack, null);
   checkServerUI();
   loadHistoryUI();
   
@@ -216,7 +215,7 @@ function setupEventListeners() {
   
   elements.addTrackBtn.addEventListener("click", () => {
     addTrack();
-    renderTracks(updateTrack, removeTrack, handleFileUploadWithLog);
+    renderTracks(updateTrack, removeTrack, null);
   });
 
   elements.runBtn.addEventListener("click", startRemix);
@@ -235,10 +234,7 @@ function setupEventListeners() {
   });
 }
 
-// File upload with logging
-async function handleFileUploadWithLog(file, trackId) {
-  return await handleFileUpload(file, trackId, addLog);
-}
+// File upload functionality removed - no longer needed
 
 // UI Update Functions
 async function refreshCreditsUI() {

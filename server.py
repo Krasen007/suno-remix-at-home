@@ -50,17 +50,7 @@ def load_env():
 
 load_env()
 
-SUNO_API_KEY = os.getenv("SUNO_API_KEY")
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-GITHUB_OWNER = os.getenv("GITHUB_OWNER")
-GITHUB_REPO = os.getenv("GITHUB_REPO")
-GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main")
-
 BASE_URL = "https://api.sunoapi.org/api/v1"
-HEADERS = {
-    "Authorization": f"Bearer {SUNO_API_KEY}",
-    "Content-Type": "application/json",
-}
 
 POLL_INTERVAL = 30
 TIMEOUT_SECONDS = 600
@@ -148,39 +138,6 @@ def save_to_history(result):
         
         # Return history for frontend localStorage storage
         return history
-
-def push_to_github(file_data, filename):
-    if not all([GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO]):
-        return None, "GitHub configuration missing in .env"
-    
-    # Sanitize github path
-    safe_name = "".join(c for c in filename if c.isalnum() or c in (".", "-", "_")).strip()
-    path = f"uploads/{int(time.time())}_{safe_name}"
-    
-    url = f"https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{path}"
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    
-    encoded_content = base64.b64encode(file_data).decode("utf-8")
-    payload = {
-        "message": f"Upload audio: {filename}",
-        "content": encoded_content,
-        "branch": GITHUB_BRANCH
-    }
-    
-    try:
-        response = requests.put(url, headers=headers, json=payload, timeout=UPLOAD_TIMEOUT)
-        if response.status_code in [200, 201]:
-            raw_url = f"https://raw.githubusercontent.com/{GITHUB_OWNER}/{GITHUB_REPO}/{GITHUB_BRANCH}/{path}"
-            return raw_url, None
-        
-        error_msg = response.json().get("message", "GitHub upload failed")
-        return None, f"GitHub Error: {error_msg}"
-    except Exception as e:
-        logger.error(f"GitHub push failed: {e}")
-        return None, str(e)
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     pass
@@ -468,40 +425,14 @@ class RemixHandler(BaseHTTPRequestHandler):
             
             self._send_sse('done', {})
         elif self.path == '/api/upload-to-github':
-            content_length = self.headers.get('Content-Length')
-            if not content_length:
-                self.send_error(411, "Length Required")
-                return
-            
-            try:
-                content_length = int(content_length)
-            except ValueError:
-                logger.error(f"Invalid Content-Length for upload: {content_length}")
-                self.send_error(400, "Invalid Content-Length")
-                return
-
-            if content_length > 100 * 1024 * 1024:  # 100MB limit
-                self.send_error(413, "File too large (100MB max)")
-                return
-
-            # Read multipart form data manually is painful, but we can assume a simplified upload
-            # or use a library if we had one. Since we don't, we'll try to extract the file part.
-            # Actually, let's just send the raw body if it's a simple binary blob with filename in header
-            filename = self.headers.get('X-Filename', 'upload.mp3')
-            file_data = self.rfile.read(content_length)
-            
-            raw_url, error = push_to_github(file_data, filename)
-            
-            if error:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": False, "message": error}).encode())
-            else:
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"success": True, "url": raw_url}).encode())
+            # GitHub upload functionality removed - use any public hosting service
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                "success": False, 
+                "message": "GitHub upload removed. Please use any public hosting service (Dropbox, Google Drive, personal website, etc.) and paste the URL directly."
+            }).encode())
         else:
             self.send_error(404)
 
@@ -514,9 +445,6 @@ class RemixHandler(BaseHTTPRequestHandler):
             logger.debug(f"SSE client disconnected: {e}")
 
 if __name__ == "__main__":
-    if not SUNO_API_KEY:
-        print("WARNING: SUNO_API_KEY not found in .env")
-    
     port = 5000
     server = ThreadingHTTPServer(('0.0.0.0', port), RemixHandler)
     print(f"Suno Remix Server running on http://localhost:{port}")

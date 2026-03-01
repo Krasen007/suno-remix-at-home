@@ -30,34 +30,18 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 3. Paste your Suno API key from [sunoapi.org](https://sunoapi.org)
 4. Click "💾 Save" - your key is stored locally in your browser
 
-**Option 2: Environment File (Advanced)**
-1. Copy `.env.example` to `.env`
-2. Add your API key: `SUNO_API_KEY=your_actual_key_here`
-3. Restart the server
 
 ### 🎵 Audio File Setup
 
-**Method 1: GitHub Integration (Best Experience)**
-1. Create GitHub token with `repo` scope at [github.com/settings/tokens](https://github.com/settings/tokens)
-2. Add to `.env`:
-   ```bash
-   GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
-   GITHUB_OWNER=your_username
-   GITHUB_REPO=audio-hosting
-   GITHUB_BRANCH=main
-   ```
-3. In the web interface, click "📤 Upload" next to any track
-4. Your files are automatically hosted and URLs filled in
-
-**Method 2: Any Public Hosting**
-1. Upload your MP3/WAV to any service (Dropbox, Google Drive, etc.)
+**Method 1: Any Public Hosting (Recommended)**
+1. Upload your MP3/WAV to any public service (Dropbox, Google Drive, personal website, etc.)
 2. Copy the public URL
 3. Paste in the "Audio URL" field in the web interface
 
-**Method 3: Local Files Only**
-1. Leave "Audio URL" field empty
-2. Files will be processed and saved locally to `remixes/` folder
-3. Download results manually when complete
+**Method 2: GitHub Integration (Advanced)**
+1. Upload files manually to a public GitHub repository
+2. Click the file, then click "Raw"
+3. Copy the URL and paste in the web interface
 
 ### 🎛️ Important Real-World Notes
 

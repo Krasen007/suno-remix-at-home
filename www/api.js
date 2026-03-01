@@ -81,35 +81,9 @@ export async function deleteHistoryItem(timestamp, variantId, addLog) {
 }
 
 export async function uploadToGitHub(file, addLog) {
-  try {
-    const res = await fetch("/api/upload-to-github", {
-      method: "POST",
-      headers: {
-        "X-Filename": encodeURIComponent(file.name),
-        "Content-Type": "application/octet-stream"
-      },
-      body: file
-    });
-
-    if (!res.ok) {
-       const errText = await res.text();
-       let msg = `Error ${res.status}`;
-       try { msg = JSON.parse(errText).message || msg; } catch(e) { console.debug("Could not parse error response as JSON"); }
-       throw new Error(msg);
-    }
-
-    const data = await res.json();
-    if (data.success) {
-      addLog(`Uploaded! Raw URL: ${data.url}`, "success");
-      return data.url;
-    } else {
-      addLog(`Upload failed: ${data.message}`, "error");
-      return null;
-    }
-  } catch (err) {
-    addLog(`Upload error: ${err.message}`, "error");
-    return null;
-  }
+  // GitHub upload functionality removed - use any public hosting service
+  addLog("GitHub upload removed. Please use any public hosting service (Dropbox, Google Drive, personal website, etc.) and paste the URL directly.", "error");
+  return null;
 }
 
 export async function startRemixSession(tracks, onLog, onResult, onDone, onError) {
