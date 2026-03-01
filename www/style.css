@@ -56,12 +56,12 @@ body {
 
 .url-indicator[data-url-type="suno"] {
   background: var(--accent);
-  color: white;
+  color: var(--text-contrast, white);
 }
 
 .url-indicator[data-url-type="local"] {
   background: var(--primary);
-  color: white;
+  color: var(--text-contrast, white);
 }
 
 /* Enhanced download button */

@@ -10,8 +10,15 @@ A powerful tool to remix your MP3 files using Suno's AI API. Now featuring a mod
 ```bash
 # 1. Set up environment
 python -m venv .venv
-source .venv/bin/activate  # Linux/macOS
-# .venv\Scripts\activate.bat  # Windows CMD
+
+# Linux/macOS
+source .venv/bin/activate
+
+# Windows CMD
+.venv\Scripts\activate.bat
+
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
 
 # 2. Install dependencies
 pip install -r requirements.txt
@@ -22,9 +29,8 @@ python server.py
 
 Visit **[http://localhost:5000](http://localhost:5000)** and start using the web interface immediately.
 
-### � API Key Setup (Critical First Step)
-
-**Option 1: Web Interface (Easiest)**
+### 🔑 API Key Setup (Critical First Step)
+**Web Interface**
 1. Open http://localhost:5000
 2. Click the "Suno API Key" field
 3. Paste your Suno API key from [sunoapi.org](https://sunoapi.org)
@@ -33,29 +39,12 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 
 ### 🎵 Audio File Setup
 
-**Method 1: Any Public Hosting (Recommended)**
+**Any Public Hosting**
 1. Upload your MP3/WAV to any public service (Dropbox, Google Drive, personal website, etc.)
 2. Copy the public URL
 3. Paste in the "Audio URL" field in the web interface
 
-**Method 2: GitHub Integration (Advanced)**
-1. Upload files manually to a public GitHub repository
-2. Click the file, then click "Raw"
-3. Copy the URL and paste in the web interface
-
 ### 🎛️ Important Real-World Notes
-
-#### ⚠️ API Key Reality
-- **No GitHub token needed** for basic usage - only Suno API key is required
-- **Browser storage** is secure and private to your device
-- **Environment variables** are optional for advanced users only
-- **Most users** will use the web interface with browser-stored keys
-
-#### 🌐 Hosting Flexibility
-- **GitHub integration** is optional - you can use any hosting service
-- **Local processing** works perfectly for offline use
-- **Mixed approach** - use GitHub for some tracks, local URLs for others
-- **No vendor lock-in** - the application works with any public URL
 
 #### 💾 Data Management
 - **Automatic downloads** protect against expired Suno links (15-day limit)
@@ -73,8 +62,7 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 6. **Access results**: Play immediately, download permanently
 7. **History**: All past sessions available in "Past Remixes" tab
 
-### � Advanced Configuration
-
+### ⚙️ Advanced Configuration
 #### Custom Styles (Examples)
 ```
 80s synth, upbeat, high energy
@@ -86,7 +74,7 @@ acoustic folk, storytelling
 #### Generation Parameters
 - **Custom Mode**: Extend/modify existing music
 - **Instrumental**: Remove vocals for karaoke/backing tracks
-- **Model**: Choose V5 for latest quality
+- **Model**: V5 for latest quality
 
 ---
 

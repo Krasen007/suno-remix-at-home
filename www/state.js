@@ -1,10 +1,10 @@
 // State Management Module
-import { saveApiKeyToLocalStorage, loadApiKeyFromLocalStorage, saveHistoryToLocalStorage, loadHistoryFromLocalStorage, mergeHistoryData } from './storage.js';
+import { saveHistoryToLocalStorage, loadHistoryFromLocalStorage, mergeHistoryData } from './storage.js';
 
 export const state = {
   tracks: [
     {
-      id: Date.now(),
+      id: Date.now().toString(),  // Use string ID for consistency
       title: "",
       url: "",
       style: "",
@@ -20,19 +20,12 @@ export const state = {
 
 export function loadState() {
   try {
-    const saved = localStorage.getItem("suno-tracks");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) {
-        state.tracks = parsed.filter(t => t && typeof t === 'object' && t.id && t.title !== undefined);
-      }
+    const savedTracks = localStorage.getItem("suno-tracks");
+    if (savedTracks) {
+      state.tracks = JSON.parse(savedTracks);
     }
-    
-    // Load API key from localStorage
-    state.apiKey = loadApiKeyFromLocalStorage();
-    
-    // Load history from localStorage
     state.history = loadHistoryFromLocalStorage();
+    state.apiKey = localStorage.getItem("suno_api_key") || '';  // Direct localStorage access
   } catch (e) {
     console.warn("Failed to parse saved state, falling back to default", e);
   }
@@ -44,7 +37,7 @@ export function saveState() {
 
 export function setApiKey(apiKey) {
   state.apiKey = apiKey;
-  saveApiKeyToLocalStorage(apiKey);
+  localStorage.setItem("suno_api_key", apiKey);  // Direct localStorage access
 }
 
 export function setRunning(running) {
@@ -53,7 +46,7 @@ export function setRunning(running) {
 
 export function addTrack(track = {}) {
   const newTrack = {
-    id: Date.now().toString(),
+    id: Date.now().toString(),  // Use string ID for consistency
     title: track.title || '',
     url: track.url || '',
     uploadUrl: track.uploadUrl || track.url || '',

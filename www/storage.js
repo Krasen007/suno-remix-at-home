@@ -26,35 +26,21 @@ export function loadHistoryFromLocalStorage() {
   }
 }
 
-// Save API key to localStorage
-export function saveApiKeyToLocalStorage(apiKey) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.API_KEY, apiKey);
-    return true;
-  } catch (error) {
-    console.error('Failed to save API key to localStorage:', error);
-    return false;
-  }
-}
-
-// Load API key from localStorage
-export function loadApiKeyFromLocalStorage() {
-  try {
-    return localStorage.getItem(STORAGE_KEYS.API_KEY) || '';
-  } catch (error) {
-    console.error('Failed to load API key from localStorage:', error);
-    return '';
-  }
-}
+// API key storage removed - use browser localStorage only
+// Note: API keys are now managed directly in browser localStorage without this wrapper
 
 // Merge server history with localStorage history
 export function mergeHistoryData(serverHistory, localHistory) {
-  const merged = [...localHistory];
+  // Defensive input validation
+  const serverArray = Array.isArray(serverHistory) ? serverHistory : [];
+  const localArray = Array.isArray(localHistory) ? localHistory : [];
+  
+  const merged = [...localArray];
   
   // Add server history items that don't exist locally
-  serverHistory.forEach(serverItem => {
+  serverArray.forEach(serverItem => {
     const exists = merged.some(localItem => 
-      Math.abs(localItem.timestamp - serverItem.timestamp) < 1
+      Math.abs(localItem.timestamp - serverItem.timestamp) < 1000  // Use 1 second threshold for ms timestamps
     );
     if (!exists) {
       merged.push(serverItem);

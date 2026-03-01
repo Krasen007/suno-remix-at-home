@@ -151,10 +151,11 @@ def download_remix(audio_url, filename):
 
 
 def save_results(results):
-    """Save results to remix_results.json."""
-    # File saving removed - results now handled via web interface
+    """Save results for web interface display."""
+    # Results are now handled via web interface - no file saving needed
     print(f"[OUTPUT] Results available via web interface")
-    pass
+    # Return results for potential future web integration
+    return results
 
 
 def main():

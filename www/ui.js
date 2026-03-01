@@ -64,7 +64,7 @@ export function updateUIForRunning(running) {
     });
 }
 
-export function renderTracks(onTrackUpdate, onTrackRemove, onFileUpload) {
+export function renderTracks(onTrackUpdate, onTrackRemove) {
   elements.tracksContainer.innerHTML = "";
   const template = document.getElementById("track-template");
 
@@ -149,11 +149,23 @@ export function addResult(result, container = elements.resultsGrid) {
       link.href = v.audioUrl;  // Direct Suno URL
       link.textContent = '🌐 Download';
       link.download = '';  // Can't download direct Suno URLs
+      link.target = '_blank';  // Open in new tab instead of downloading
+      link.rel = 'noopener noreferrer';  // Security for external links
       link.setAttribute('data-url-type', 'suno');
     } else {
       link.href = v.localUrl || v.audioUrl;  // Local file
       link.textContent = '💾 Download Local';
-      link.download = `${v.title || result.title}.mp3`;
+      
+      // Sanitize filename for download
+      const sanitizeFilename = (filename) => {
+        return filename
+          .replace(/[^a-zA-Z0-9._-]/g, '')  // Remove invalid characters
+          .replace(/\s+/g, '_')           // Replace spaces with underscores
+          .substring(0, 50);              // Limit length
+      };
+      
+      const safeFilename = sanitizeFilename(v.title || result.title) || 'audio';
+      link.download = `${safeFilename}.mp3`;
       link.setAttribute('data-url-type', 'local');
     }
     
@@ -190,11 +202,16 @@ export function addResult(result, container = elements.resultsGrid) {
   }
 }
 
-export function renderHistory(history, onDeleteItem) {
+export function renderHistory(history) {
   elements.historyGrid.innerHTML = "";
   
-  // Ensure history is an array
+  // Ensure history is an array and handle gracefully
   const historyArray = Array.isArray(history) ? history : [];
+  
+  if (historyArray.length === 0) {
+    elements.historyGrid.innerHTML = '<div class="empty-state">No history yet. Start a remix session to see variants.</div>';
+    return;
+  }
   
   if (historyArray.length === 0) {
     elements.historyGrid.innerHTML = '<div class="empty-state">No past remixes found.</div>';

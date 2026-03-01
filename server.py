@@ -134,7 +134,11 @@ def save_to_history(result):
         except OSError as e:
             logger.error(f"History save failed: {e}")
             if os.path.exists(temp_file):
-                os.remove(temp_file)
+                try:
+                    os.remove(temp_file)
+                except OSError:
+                    # Ignore removal error, original error is more important
+                    pass
         
         # Return history for frontend localStorage storage
         return history
@@ -153,6 +157,14 @@ class RemixHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
         self.end_headers()
+
+    def _send_sse(self, event_type, data):
+        try:
+            payload = json.dumps({'type': event_type, **data})
+            self.wfile.write(f"data: {payload}\n\n".encode())
+            self.wfile.flush()
+        except (BrokenPipeError, OSError) as e:
+            logger.debug(f"SSE client disconnected: {e}")
 
     def do_DELETE(self):
         decoded_path = urllib.parse.unquote(self.path)
@@ -405,12 +417,11 @@ class RemixHandler(BaseHTTPRequestHandler):
                                 self._send_sse('log', {'message': f"Using Suno URL: {v['audioUrl']}", 'level': 'info'})
                                 updated_variants.append(v_copy)
                             else:
-                                # Fallback to download if needed (for non-Suno sources)
-                                path, local_url = download_audio(v.get('fallbackUrl', ''), fname)
-                                if local_url:
-                                    v_copy = v.copy()
-                                    v_copy["localUrl"] = local_url
-                                    updated_variants.append(v_copy)
+                                # No download functionality - only use direct URLs
+                                v_copy = v.copy()
+                                v_copy["localUrl"] = v.get('audioUrl', '')  # Use provided URL directly
+                                self._send_sse('log', {'message': f"Using provided URL: {v.get('audioUrl', '')}", 'level': 'info'})
+                                updated_variants.append(v_copy)
                         
                         result_payload = {'title': track['title'], 'variants': updated_variants, 'images': images}
                         save_to_history(result_payload)
@@ -425,14 +436,8 @@ class RemixHandler(BaseHTTPRequestHandler):
             
             self._send_sse('done', {})
         elif self.path == '/api/upload-to-github':
-            # GitHub upload functionality removed - use any public hosting service
-            self.send_response(400)
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "success": False, 
-                "message": "GitHub upload removed. Please use any public hosting service (Dropbox, Google Drive, personal website, etc.) and paste the URL directly."
-            }).encode())
+            # GitHub upload endpoint removed - return 404
+            self.send_error(404)
         else:
             self.send_error(404)
 

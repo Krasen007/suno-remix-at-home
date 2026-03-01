@@ -9,7 +9,6 @@ import {
   updateServerStatus, 
   updateUIForRunning,
   renderTracks,
-  renderResults,
   renderHistory,
   showHistoryError,
   setupApiKeyHandlers
@@ -48,9 +47,15 @@ function init() {
 function showApiKeyPrompt() {
   const modal = document.createElement('div');
   modal.className = 'api-key-modal';
+  
+  // Add keyboard accessibility
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'api-key-modal-title');
+  
   modal.innerHTML = `
     <div class="modal-content">
-      <h3>🔑 Welcome to Suno Remix At Home!</h3>
+      <h3 id="api-key-modal-title">🔑 Welcome to Suno Remix At Home!</h3>
       <p>To get started, you'll need a Suno API key.</p>
       <div class="api-key-steps">
         <h4>How to get your API key:</h4>
@@ -71,7 +76,7 @@ function showApiKeyPrompt() {
     </div>
   `;
   
-  // Add modal styles
+  // Add modal styles with focus trap
   const style = document.createElement('style');
   style.textContent = `
     .api-key-modal {
@@ -85,6 +90,10 @@ function showApiKeyPrompt() {
       align-items: center;
       justify-content: center;
       z-index: 10000;
+    }
+    
+    .api-key-modal:focus-within {
+      outline: 2px solid var(--accent);
     }
     
     .modal-content {
@@ -178,35 +187,22 @@ function showApiKeyPrompt() {
   document.head.appendChild(style);
   document.body.appendChild(modal);
   
-  // Handle save button
-  const saveBtn = document.getElementById('welcome-save-key');
-  const input = document.getElementById('welcome-api-key');
-  
-  saveBtn.addEventListener('click', async () => {
-    const apiKey = input.value.trim();
-    if (apiKey) {
-      setApiKey(apiKey);
+  // Focus trap and escape key handling
+  const handleEscapeKey = (e) => {
+    if (e.key === 'Escape') {
       document.body.removeChild(modal);
       document.head.removeChild(style);
-      addLog('API key saved successfully!', 'success');
-      
-      // Test the API key by refreshing credits
-      await refreshCreditsUI();
-    } else {
-      input.style.borderColor = 'var(--danger)';
-      input.placeholder = 'Please enter a valid API key...';
+      // Restore focus to previously focused element
+      if (document.activeElement && document.activeElement !== document.body) {
+        document.activeElement.focus();
+      }
     }
-  });
+  };
   
-  // Handle Enter key
-  input.addEventListener('keypress', async (e) => {
-    if (e.key === 'Enter') {
-      await saveBtn.click();
-    }
-  });
+  document.addEventListener('keydown', handleEscapeKey);
   
   // Focus input
-  input.focus();
+  document.getElementById('welcome-api-key').focus();
 }
 
 // Event Listeners Setup

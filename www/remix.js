@@ -38,8 +38,7 @@ export async function startRemixProcess(onLog, onResult, onSessionComplete, onCo
   const success = await startRemixSession(
     tracks,
     onLog,
-    onResult,
-    () => {
+    (result) => {  // Pass only the result object to onResult
       setRunning(false);
       onSessionComplete();
     },
