@@ -169,7 +169,7 @@ export function addResult(result, container = elements.resultsGrid) {
     // Smart download behavior based on URL type
     if (isSunoUrl) {
       link.href = v.audioUrl;  // Direct Suno URL
-      link.textContent = '🌐 Stream from Suno';
+      link.textContent = '🌐 Download';
       link.download = '';  // Can't download direct Suno URLs
       link.setAttribute('data-url-type', 'suno');
     } else {

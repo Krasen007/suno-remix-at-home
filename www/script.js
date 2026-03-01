@@ -1,5 +1,5 @@
 // Main Application Orchestration
-import { loadState, addTrack, removeTrack, updateTrack, setApiKey } from './state.js';
+import { loadState, addTrack, removeTrack, updateTrack, setApiKey, state } from './state.js';
 import { refreshCredits, checkServer, loadHistory, deleteHistoryItem } from './api.js';
 import { 
   initializeElements, 
@@ -25,9 +25,16 @@ function init() {
   // Initialize UI elements
   const elements = initializeElements();
   
+  // Check if API key exists, show prompt if not
+  if (!state.apiKey) {
+    showApiKeyPrompt();
+  } else {
+    // Only refresh credits if API key exists
+    refreshCreditsUI();
+  }
+  
   // Initial render
   renderTracks(updateTrack, removeTrack, handleFileUploadWithLog);
-  refreshCreditsUI();
   checkServerUI();
   loadHistoryUI();
   
@@ -36,6 +43,171 @@ function init() {
   
   // Setup event listeners
   setupEventListeners();
+}
+
+// Show API key prompt for first-time users
+function showApiKeyPrompt() {
+  const modal = document.createElement('div');
+  modal.className = 'api-key-modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>🔑 Welcome to Suno Remix At Home!</h3>
+      <p>To get started, you'll need a Suno API key.</p>
+      <div class="api-key-steps">
+        <h4>How to get your API key:</h4>
+        <ol>
+          <li>Visit <a href="https://sunoapi.org" target="_blank">sunoapi.org</a></li>
+          <li>Go to your account settings</li>
+          <li>Find the API section and generate your key</li>
+          <li>Copy the key and paste it below</li>
+        </ol>
+      </div>
+      <div class="api-key-input-group">
+        <input type="password" id="welcome-api-key" placeholder="Enter your Suno API key..." class="api-key-input">
+        <button id="welcome-save-key" class="btn btn-primary">Save API Key</button>
+      </div>
+      <div class="modal-footer">
+        <small>Your API key will be stored locally in your browser only.</small>
+      </div>
+    </div>
+  `;
+  
+  // Add modal styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .api-key-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+    }
+    
+    .modal-content {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      color: #ffffff;
+    }
+    
+    .modal-content h3 {
+      color: #ffffff;
+      margin: 0 0 1rem 0;
+    }
+    
+    .modal-content p {
+      color: #cccccc;
+      margin: 0 0 1.5rem 0;
+    }
+    
+    .api-key-steps {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: #2a2a2a;
+      border-radius: 8px;
+      border: 1px solid #444;
+    }
+    
+    .api-key-steps h4 {
+      margin: 0 0 0.5rem 0;
+      color: #ffffff;
+    }
+    
+    .api-key-steps ol {
+      margin: 0;
+      padding-left: 1.5rem;
+      color: #cccccc;
+    }
+    
+    .api-key-steps li {
+      margin: 0.5rem 0;
+    }
+    
+    .api-key-steps a {
+      color: #4a9eff;
+      text-decoration: none;
+    }
+    
+    .api-key-steps a:hover {
+      text-decoration: underline;
+    }
+    
+    .api-key-input-group {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .api-key-input-group input {
+      flex: 1;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #ffffff;
+      padding: 0.75rem;
+      border-radius: 6px;
+    }
+    
+    .api-key-input-group input::placeholder {
+      color: #888888;
+    }
+    
+    .api-key-input-group input:focus {
+      outline: none;
+      border-color: #4a9eff;
+    }
+    
+    .modal-footer {
+      margin-top: 1rem;
+      text-align: center;
+    }
+    
+    .modal-footer small {
+      color: #888888;
+    }
+  `;
+  
+  document.head.appendChild(style);
+  document.body.appendChild(modal);
+  
+  // Handle save button
+  const saveBtn = document.getElementById('welcome-save-key');
+  const input = document.getElementById('welcome-api-key');
+  
+  saveBtn.addEventListener('click', async () => {
+    const apiKey = input.value.trim();
+    if (apiKey) {
+      setApiKey(apiKey);
+      document.body.removeChild(modal);
+      document.head.removeChild(style);
+      addLog('API key saved successfully!', 'success');
+      
+      // Test the API key by refreshing credits
+      await refreshCreditsUI();
+    } else {
+      input.style.borderColor = 'var(--danger)';
+      input.placeholder = 'Please enter a valid API key...';
+    }
+  });
+  
+  // Handle Enter key
+  input.addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+      await saveBtn.click();
+    }
+  });
+  
+  // Focus input
+  input.focus();
 }
 
 // Event Listeners Setup
