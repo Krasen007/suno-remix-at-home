@@ -1,29 +1,41 @@
 // Main Application Orchestration
-import { loadState, addTrack, removeTrack, updateTrack, setApiKey, state } from './state.js';
-import { refreshCredits, checkServer, loadHistory, deleteHistoryItem } from './api.js';
 import {
-  initializeElements, 
-  getElements, 
-  addLog, 
-  updateCreditsBadge, 
-  updateServerStatus, 
+  loadState,
+  addTrack,
+  removeTrack,
+  updateTrack,
+  setApiKey,
+  state,
+} from "./state.js";
+import {
+  refreshCredits,
+  checkServer,
+  loadHistory,
+  deleteHistoryItem,
+} from "./api.js";
+import {
+  initializeElements,
+  getElements,
+  addLog,
+  updateCreditsBadge,
+  updateServerStatus,
   updateUIForRunning,
   renderTracks,
   addResult,
   renderHistory,
   showHistoryError,
-  setupApiKeyHandlers
-} from './ui.js';
-import { startRemixProcess } from './remix.js';
+  setupApiKeyHandlers,
+} from "./ui.js";
+import { startRemixProcess } from "./remix.js";
 
 // Initialize application
 function init() {
   // Load initial state
   loadState();
-  
+
   // Initialize UI elements
   const elements = initializeElements();
-  
+
   // Check if API key exists, show prompt if not
   if (!state.apiKey) {
     showApiKeyPrompt();
@@ -31,29 +43,32 @@ function init() {
     // Only refresh credits if API key exists
     refreshCreditsUI();
   }
-  
+
   // Initial render
   renderTracks(handleTrackUpdate, removeTrack, null);
   checkServerUI();
   loadHistoryUI();
-  
+
   // Setup API key handlers
   setupApiKeyHandlers(setApiKey, addLog, refreshCreditsUI);
-  
+
   // Setup event listeners
   setupEventListeners();
 }
 
 // Show API key prompt for first-time users
 function showApiKeyPrompt() {
-  const modal = document.createElement('div');
-  modal.className = 'api-key-modal';
-  
+  // Capture previously focused element before creating modal
+  const prevFocusedElement = document.activeElement;
+
+  const modal = document.createElement("div");
+  modal.className = "api-key-modal";
+
   // Add keyboard accessibility
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
-  modal.setAttribute('aria-labelledby', 'api-key-modal-title');
-  
+  modal.setAttribute("role", "dialog");
+  modal.setAttribute("aria-modal", "true");
+  modal.setAttribute("aria-labelledby", "api-key-modal-title");
+
   modal.innerHTML = `
     <div class="modal-content">
       <h3 id="api-key-modal-title">🔑 Welcome to Suno Remix At Home!</h3>
@@ -73,9 +88,9 @@ function showApiKeyPrompt() {
       </div>
     </div>
   `;
-  
+
   // Add modal styles with focus trap
-  const style = document.createElement('style');
+  const style = document.createElement("style");
   style.textContent = `
     .api-key-modal {
       position: fixed;
@@ -166,36 +181,48 @@ function showApiKeyPrompt() {
       min-width: 120px;
     }
   `;
-  
+
   document.head.appendChild(style);
   document.body.appendChild(modal);
-  
+
   // Focus trap and escape key handling
   const handleEscapeKey = (e) => {
-    if (e.key === 'Escape') {
+    if (e.key === "Escape") {
+      document.removeEventListener("keydown", handleEscapeKey);
       document.body.removeChild(modal);
       document.head.removeChild(style);
       // Restore focus to previously focused element
-      if (document.activeElement && document.activeElement !== document.body) {
-        document.activeElement.focus();
+      if (
+        prevFocusedElement &&
+        prevFocusedElement.focus &&
+        document.contains(prevFocusedElement)
+      ) {
+        prevFocusedElement.focus();
       }
     }
   };
-  
-  document.addEventListener('keydown', handleEscapeKey);
-  
+
+  document.addEventListener("keydown", handleEscapeKey);
+
   // Add close button handler
-  document.getElementById('welcome-close-modal').addEventListener('click', () => {
-    document.body.removeChild(modal);
-    document.head.removeChild(style);
-    // Restore focus to previously focused element
-    if (document.activeElement && document.activeElement !== document.body) {
-      document.activeElement.focus();
-    }
-  });
-  
+  document
+    .getElementById("welcome-close-modal")
+    .addEventListener("click", () => {
+      document.removeEventListener("keydown", handleEscapeKey);
+      document.body.removeChild(modal);
+      document.head.removeChild(style);
+      // Restore focus to previously focused element
+      if (
+        prevFocusedElement &&
+        prevFocusedElement.focus &&
+        document.contains(prevFocusedElement)
+      ) {
+        prevFocusedElement.focus();
+      }
+    });
+
   // Focus close button
-  document.getElementById('welcome-close-modal').focus();
+  document.getElementById("welcome-close-modal").focus();
 }
 
 // Track update handler
@@ -206,7 +233,7 @@ function handleTrackUpdate(trackId, field, value) {
 // Event Listeners Setup
 function setupEventListeners() {
   const elements = getElements();
-  
+
   elements.addTrackBtn.addEventListener("click", () => {
     addTrack();
     renderTracks(handleTrackUpdate, removeTrack, null);
@@ -215,14 +242,14 @@ function setupEventListeners() {
   elements.runBtn.addEventListener("click", startRemix);
   elements.refreshCreditsBtn.addEventListener("click", refreshCreditsUI);
   elements.refreshHistoryBtn.addEventListener("click", loadHistoryUI);
-  
+
   elements.clearLogsBtn.addEventListener("click", () => {
     elements.consoleOutput.innerHTML = "";
     addLog("Console cleared.", "info");
   });
 
   // Custom event listener for history item deletion
-  document.addEventListener('deleteHistoryItem', async (e) => {
+  document.addEventListener("deleteHistoryItem", async (e) => {
     const { timestamp, variantId } = e.detail;
     await deleteHistoryItemUI(timestamp, variantId);
   });
@@ -255,7 +282,11 @@ async function loadHistoryUI() {
 }
 
 async function deleteHistoryItemUI(timestamp, variantId) {
-  const { success, error } = await deleteHistoryItem(timestamp, variantId, addLog);
+  const { success, error } = await deleteHistoryItem(
+    timestamp,
+    variantId,
+    addLog,
+  );
   if (success) {
     loadHistoryUI();
   } else if (error && error !== "User cancelled deletion") {
@@ -266,18 +297,25 @@ async function deleteHistoryItemUI(timestamp, variantId) {
 // Remix Process
 async function startRemix() {
   updateUIForRunning(true);
-  
+
   // Get elements for results grid
   const elements = getElements();
-  
+
   // Clear current results before starting new remix
-  elements.resultsGrid.innerHTML = '<div class="empty-state">Processing... Your remix results will appear here.</div>';
-  
+  elements.resultsGrid.innerHTML =
+    '<div class="empty-state">Processing... Your remix results will appear here.</div>';
+
+  // Flag to track if results have been cleared
+  let resultsCleared = false;
+
   const success = await startRemixProcess(
     addLog,
     (result) => {
-      // Clear the processing message and add results
-      elements.resultsGrid.innerHTML = '';
+      // Clear the processing message only once
+      if (!resultsCleared) {
+        elements.resultsGrid.innerHTML = "";
+        resultsCleared = true;
+      }
       addResult(result);
     },
     async () => {
@@ -287,17 +325,17 @@ async function startRemix() {
     (error) => {
       addLog(error, "error");
       updateUIForRunning(false);
-    }
+    },
   );
-  
+
   if (!success) {
     updateUIForRunning(false);
   }
 }
 
 // Start the application
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
 } else {
   init();
 }

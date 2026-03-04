@@ -7,6 +7,7 @@ A powerful tool to remix your MP3 files using Suno's AI API. Now featuring a mod
 ## 🚀 Real-World Usage Guide
 
 ### 🎯 Quick Start (Recommended)
+
 ```bash
 # 1. Set up environment
 python -m venv .venv
@@ -32,14 +33,15 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 ## 🎵 Features
 
 ### ✨ Modern Web Interface
+
 - **Clean, responsive design** with dark theme
 - **Real-time processing feedback** with live status updates
-- **Drag-and-drop support** for audio files (removed - now uses public URLs)
-- **Live results display** with audio playback controls
+- **Public URL input** for audio files from any hosting service- **Live results display** with audio playback controls
 - **Persistent storage** using browser localStorage
 - **No server-side dependencies** for API keys
 
 ### 🔐 Security & Privacy
+
 - **Browser-only storage** - API keys stored locally, never on server
 - **No environment variables** required for API keys
 - **Secure API key handling** with input validation
@@ -48,18 +50,21 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 ### 🎛️ Core Functionality
 
 #### **Track Management**
+
 - Add multiple tracks with titles, audio URLs, styles, and prompts
 - Support for various audio hosting services (Dropbox, Google Drive, personal websites)
 - Real-time validation and feedback
 - Track removal with confirmation
 
 #### **Remix Processing**
+
 - Real-time SSE (Server-Sent Events) for live updates
 - Progress tracking with detailed status messages
 - Multiple variant generation per track
 - Automatic history saving and management
 
 #### **Results & History**
+
 - Live audio playback with HTML5 controls
 - Download links for all generated variants
 - Persistent history storage across sessions
@@ -69,12 +74,14 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 ### 🛠️ Technical Improvements
 
 #### **Enhanced Error Handling**
+
 - **Consistent API error patterns** - All functions return `{data, error}` objects
 - **Specific error messages** for common issues (invalid API keys, quota exceeded, etc.)
 - **Robust validation** with detailed debugging information
 - **Graceful failure handling** with user-friendly messages
 
 #### **Accessibility Features**
+
 - **Proper label associations** for all form fields
 - **Keyboard navigation support** with focus management
 - **ARIA roles and attributes** for screen readers
@@ -82,6 +89,7 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 - **Semantic HTML structure** for better accessibility
 
 #### **Code Quality**
+
 - **Standardized error handling** across all API functions
 - **Separated concerns** - Single responsibility per function
 - **Removed redundant code** and unreachable logic
@@ -91,6 +99,7 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 ### 🔧 API Integration
 
 #### **Suno API Features**
+
 - **Credit checking** with real-time balance display
 - **Multiple remix styles** (custom mode, instrumental options)
 - **Style and prompt controls** for creative direction
@@ -98,6 +107,7 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 - **Automatic URL validation** and error handling
 
 #### **Storage & Persistence**
+
 - **Browser localStorage** for API keys and tracks
 - **Automatic history merging** between sessions
 - **State management** with proper validation
@@ -106,6 +116,7 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 ### 🌐 Hosting Requirements
 
 #### **Audio URL Sources**
+
 Since GitHub upload functionality has been removed, use any public hosting service:
 
 - **Dropbox** - Upload MP3 files and get shareable links
@@ -114,6 +125,7 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 - **Direct Suno URLs** - Use Suno's temporary URLs directly
 
 #### **URL Format Requirements**
+
 - Must be publicly accessible (no authentication required)
 - Direct MP3 file links work best
 - HTTPS URLs recommended for security
@@ -122,12 +134,14 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 ### 🎯 Getting Started
 
 #### **1. API Key Setup**
+
 1. Visit [sunoapi.org](https://sunoapi.org) to get your API key
 2. Copy your API key from the account settings
 3. Paste the key in the app's API key input
 4. Your key is stored locally in your browser only
 
 #### **2. Add Your Tracks**
+
 1. Click "Add Track" to create a new track entry
 2. Enter a descriptive title for your remix
 3. Paste the public URL to your MP3 file
@@ -136,6 +150,7 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 6. Configure options (custom mode, instrumental)
 
 #### **3. Start Remixing**
+
 1. Click "Start Remixing" to begin processing
 2. Watch real-time progress in the terminal output
 3. Results appear automatically as they're generated
@@ -146,21 +161,25 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 #### **Common Issues & Solutions**
 
 **"No valid tracks" Error**
+
 - Ensure each track has both a title and a public URL
 - Check that URLs are accessible (test in incognito browser)
 - Verify URL format (https:// required for most hosting)
 
 **"Invalid API Key" Error**
+
 - Double-check your API key from sunoapi.org
 - Ensure no extra spaces or characters
 - Try refreshing the credits to test connectivity
 
 **"Results Not Showing" Issue**
+
 - Check browser console for any JavaScript errors
 - Ensure remix processing completed successfully
 - Try refreshing the page if results seem delayed
 
 **Audio Playback Issues**
+
 - Ensure URLs are directly accessible
 - Check browser compatibility with audio formats
 - Try downloading files if streaming doesn't work
@@ -168,6 +187,7 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 ### 🔄 Updates & Changelog
 
 #### **Recent Improvements**
+
 - ✅ **Enhanced error handling** with specific API error messages
 - ✅ **Improved accessibility** with proper label associations
 - ✅ **Fixed track validation** and state management
@@ -177,6 +197,7 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 - ✅ **Enhanced onboarding** with cleaner welcome flow
 
 #### **Technical Debt Resolved**
+
 - Fixed inconsistent API error handling patterns
 - Resolved track state update issues with proper callbacks
 - Improved SSE parsing and result processing
@@ -195,6 +216,7 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 ## 🤝️ Support
 
 For issues, feature requests, or contributions:
+
 - Check the troubleshooting section above
 - Review browser console for detailed error information
 - Ensure all URLs are publicly accessible
@@ -205,16 +227,18 @@ For issues, feature requests, or contributions:
 **Start remixing your music today!** 🎵
 
 ### 🔑 API Key Setup (Critical First Step)
+
 **Web Interface**
+
 1. Open http://localhost:5000
 2. Click the "Suno API Key" field
 3. Paste your Suno API key from [sunoapi.org](https://sunoapi.org)
 4. Click "💾 Save" - your key is stored locally in your browser
 
-
 ### 🎵 Audio File Setup
 
 **Any Public Hosting**
+
 1. Upload your MP3/WAV to any public service (Dropbox, Google Drive, personal website, etc.)
 2. Copy the public URL
 3. Paste in the "Audio URL" field in the web interface
@@ -222,6 +246,7 @@ For issues, feature requests, or contributions:
 ### 🎛️ Important Real-World Notes
 
 #### 💾 Data Management
+
 - **Automatic downloads** protect against expired Suno links (15-day limit)
 - **Browser localStorage** provides persistent history across sessions
 - **No server files** - everything stays on your local machine
@@ -238,7 +263,9 @@ For issues, feature requests, or contributions:
 7. **History**: All past sessions available in "Past Remixes" tab
 
 ### ⚙️ Advanced Configuration
+
 #### Custom Styles (Examples)
+
 ```
 80s synth, upbeat, high energy
 lo-fi hip hop, chill vibes
@@ -247,6 +274,7 @@ acoustic folk, storytelling
 ```
 
 #### Generation Parameters
+
 - **Custom Mode**: Extend/modify existing music
 - **Instrumental**: Remove vocals for karaoke/backing tracks
 - **Model**: V5 for latest quality
@@ -256,15 +284,17 @@ acoustic folk, storytelling
 ## 🛠️ Technical Details
 
 ### 📂 Data Storage
+
 - **Browser localStorage**: API keys and history (secure, client-side)
 - **Local files**: `remixes/` folder for permanent MP3 storage
 - **No server persistence**: Stateless design for privacy and performance
 
 ### 🔐 Security Model
+
 - **Client-side keys**: Never transmitted to server logs
 - **Session-based auth**: Temporary tokens only during processing
 - **HTTPS only**: All API calls use encrypted connections
-- **No key exposure**: API keys hidden from browser dev tools
+- **Client-side only**: API keys stored locally, not transmitted to server
 
 ---
 

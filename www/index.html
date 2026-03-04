@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>">
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎵</text></svg>"
+    />
     <title>Suno Remix | AI Music Engine</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,7 +29,13 @@
           </button>
           <div id="credits-badge" class="badge">Credits: --</div>
           <div id="guide-badge" class="badge">
-            <a href="guide.html" target="_blank" title="View Guide" class="guide-link">📖 Guide</a>
+            <a
+              href="guide.html"
+              target="_blank"
+              title="View Guide"
+              class="guide-link"
+              >📖 Guide</a
+            >
           </div>
         </div>
       </header>
@@ -50,14 +59,20 @@
                 class="api-key-input"
                 form="api-key-form"
               />
-              <button id="save-api-key" class="btn btn-secondary btn-sm" form="api-key-form">
+              <button
+                id="save-api-key"
+                class="btn btn-secondary btn-sm"
+                form="api-key-form"
+              >
                 💾 Save
               </button>
             </div>
-            <small class="form-help">Your API key is stored locally in your browser</small>
+            <small class="form-help"
+              >Your API key is stored locally in your browser</small
+            >
           </div>
 
-          <form id="api-key-form" style="display: none;"></form>
+          <form id="api-key-form" style="display: none"></form>
 
           <div id="tracks-container" class="tracks-list">
             <!-- Tracks will be injected here -->
@@ -81,7 +96,8 @@
             </div>
             <div id="console-output" class="console">
               <div class="log info">
-                Ready to remix. Add your audio URLs from any public hosting service and styles.
+                Ready to remix. Add your audio URLs from any public hosting
+                service and styles.
               </div>
             </div>
           </div>
@@ -97,8 +113,10 @@
 
           <div class="history-wrapper">
             <div class="section-header">
-                <h3>Past Remixes</h3>
-                <button id="refresh-history" class="btn-text-only">Refresh History</button>
+              <h3>Past Remixes</h3>
+              <button id="refresh-history" class="btn-text-only">
+                Refresh History
+              </button>
             </div>
             <div id="history-grid" class="results-grid">
               <!-- History will be injected here -->
@@ -131,7 +149,7 @@
           <input
             type="url"
             class="track-url"
-            placeholder="https://dropbox.com/... or https://drive.google.com/..."
+            placeholder="Direct file URL (e.g. raw GitHub, dl.dropboxusercontent.com, or drive.google.com/uc?export=download)"
           />
         </div>
         <div class="form-group">
@@ -171,8 +189,15 @@
         </div>
         <audio controls class="res-audio"></audio>
         <div class="result-actions">
-          <a href="#" target="_blank" class="btn btn-sm btn-accent res-link">Download</a>
-          <button class="btn btn-sm btn-danger res-delete hidden" title="Delete from history">🗑️</button>
+          <a href="#" target="_blank" class="btn btn-sm btn-accent res-link"
+            >Download</a
+          >
+          <button
+            class="btn btn-sm btn-danger res-delete hidden"
+            title="Delete from history"
+          >
+            🗑️
+          </button>
         </div>
       </div>
     </template>

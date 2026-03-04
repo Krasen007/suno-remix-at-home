@@ -428,8 +428,6 @@ class RemixHandler(BaseHTTPRequestHandler):
                         
                         updated_variants = []
                         for idx, v in enumerate(variants):
-                            fname = f"{track['title']}_v{idx+1}"
-                            
                             # Use Suno's URL directly instead of downloading
                             if v.get('audioUrl'):
                                 v_copy = v.copy()
@@ -460,14 +458,6 @@ class RemixHandler(BaseHTTPRequestHandler):
             self.send_error(404)
         else:
             self.send_error(404)
-
-    def _send_sse(self, event_type, data):
-        try:
-            payload = json.dumps({'type': event_type, **data})
-            self.wfile.write(f"data: {payload}\n\n".encode())
-            self.wfile.flush()
-        except (BrokenPipeError, OSError) as e:
-            logger.debug(f"SSE client disconnected: {e}")
 
 if __name__ == "__main__":
     port = 5000

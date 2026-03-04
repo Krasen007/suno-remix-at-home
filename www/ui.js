@@ -1,5 +1,5 @@
 // UI Management Module
-import { state } from './state.js';
+import { state } from "./state.js";
 
 // DOM Elements cache
 let elements = {};
@@ -43,7 +43,8 @@ export function addLog(message, level = "info") {
 
 export function updateCreditsBadge(credits) {
   elements.creditsBadge.textContent = `Credits: ${credits}`;
-  elements.creditsBadge.style.color = credits > 0 ? "var(--primary)" : "var(--danger)";
+  elements.creditsBadge.style.color =
+    credits > 0 ? "var(--primary)" : "var(--danger)";
 }
 
 export function updateServerStatus(statusInfo) {
@@ -56,7 +57,9 @@ export function updateUIForRunning(running) {
   elements.runBtn.querySelector(".btn-text").textContent = running
     ? "Processing..."
     : "Start Remixing";
-  elements.runBtn.querySelector(".loader-dots").classList.toggle("hidden", !running);
+  elements.runBtn
+    .querySelector(".loader-dots")
+    .classList.toggle("hidden", !running);
   document
     .querySelectorAll(".remove-track, #add-track, input, textarea")
     .forEach((el) => {
@@ -86,12 +89,12 @@ export function renderTracks(onTrackUpdate, onTrackRemove) {
     fields.forEach((f) => {
       const input = card.querySelector(f.class);
       const formGroup = input.closest(".form-group");
-      const label = formGroup?.querySelector("label") || 
-                    input.closest(".checkbox-label");
+      const label =
+        formGroup?.querySelector("label") || input.closest(".checkbox-label");
       const uniqueId = `track-${track.id}-${f.field}`;
-      
+
       input.id = uniqueId;
-      
+
       // Handle label association
       if (label) {
         if (label.tagName === "LABEL") {
@@ -115,7 +118,8 @@ export function renderTracks(onTrackUpdate, onTrackRemove) {
           onTrackUpdate(track.id, f.field, e.target.checked),
         );
       } else {
-        input.value = track[f.field] || (f.field === "url" ? track.url : "") || "";
+        input.value =
+          track[f.field] || (f.field === "url" ? track.url : "") || "";
         input.addEventListener("input", (e) =>
           onTrackUpdate(track.id, f.field, e.target.value),
         );
@@ -135,61 +139,62 @@ export function renderTracks(onTrackUpdate, onTrackRemove) {
 
 export function addResult(result, container = elements.resultsGrid) {
   const template = document.getElementById("result-template");
-  
+
   if (!template) {
-    console.error('Result template not found!');
+    console.error("Result template not found!");
     return;
   }
-  
+
   const fragment = document.createDocumentFragment();
 
   result.variants.forEach((v) => {
     const clone = template.content.cloneNode(true);
-    
+
     // Update result content
     clone.querySelector(".res-title").textContent = v.title || result.title;
     clone.querySelector(".res-dur").textContent = v.duration || "--";
-    
+
     const audio = clone.querySelector(".res-audio");
     audio.src = v.audioUrl;
     audio.controls = true;
-    audio.preload = 'metadata';
-    
+    audio.preload = "metadata";
+
     // Add error handling for Suno URLs
-    audio.addEventListener('error', () => {
-      if (v.audioUrl && v.audioUrl.includes('tempfile.aiquickdraw.com')) {
-        console.warn('Suno URL may be expired. Try refreshing.');
+    audio.addEventListener("error", () => {
+      if (v.audioUrl && v.audioUrl.includes("tempfile.aiquickdraw.com")) {
+        console.warn("Suno URL may be expired. Try refreshing.");
       }
     });
-    
+
     const link = clone.querySelector(".res-link");
-    const isSunoUrl = v.audioUrl && v.audioUrl.includes('tempfile.aiquickdraw.com');
-    
+    const isSunoUrl =
+      v.audioUrl && v.audioUrl.includes("tempfile.aiquickdraw.com");
+
     // Smart download behavior based on URL type
     if (isSunoUrl) {
-      link.href = v.audioUrl;  // Direct Suno URL
-      link.textContent = '🌐 Download';
-      link.download = '';  // Can't download direct Suno URLs
-      link.target = '_blank';  // Open in new tab instead of downloading
-      link.rel = 'noopener noreferrer';  // Security for external links
-      link.setAttribute('data-url-type', 'suno');
+      link.href = v.audioUrl; // Direct Suno URL
+      link.textContent = "🌐 Download";
+      link.download = ""; // Can't download direct Suno URLs
+      link.target = "_blank"; // Open in new tab instead of downloading
+      link.rel = "noopener noreferrer"; // Security for external links
+      link.setAttribute("data-url-type", "suno");
     } else {
-      link.href = v.localUrl || v.audioUrl;  // Local file
-      link.textContent = '💾 Download Local';
-      
+      link.href = v.localUrl || v.audioUrl; // Local file
+      link.textContent = "💾 Download Local";
+
       // Sanitize filename for download
       const sanitizeFilename = (filename) => {
         return filename
-          .replace(/[^a-zA-Z0-9._-]/g, '')  // Remove invalid characters
-          .replace(/\s+/g, '_')           // Replace spaces with underscores
-          .substring(0, 50);              // Limit length
+          .replace(/\s+/g, "_") // Replace spaces with underscores first
+          .replace(/[^a-zA-Z0-9._-]/g, "") // Then remove invalid characters
+          .substring(0, 50); // Limit length
       };
-      
-      const safeFilename = sanitizeFilename(v.title || result.title) || 'audio';
+
+      const safeFilename = sanitizeFilename(v.title || result.title) || "audio";
       link.download = `${safeFilename}.mp3`;
-      link.setAttribute('data-url-type', 'local');
+      link.setAttribute("data-url-type", "local");
     }
-    
+
     // Handle Cover Art
     if (v.imageUrl) {
       const img = clone.querySelector(".res-image");
@@ -204,8 +209,8 @@ export function addResult(result, container = elements.resultsGrid) {
       delBtn.classList.remove("hidden");
       delBtn.addEventListener("click", () => {
         // This will be handled by the main app
-        const event = new CustomEvent('deleteHistoryItem', {
-          detail: { timestamp: result.timestamp, variantId: v.id }
+        const event = new CustomEvent("deleteHistoryItem", {
+          detail: { timestamp: result.timestamp, variantId: v.id },
         });
         document.dispatchEvent(event);
       });
@@ -213,7 +218,7 @@ export function addResult(result, container = elements.resultsGrid) {
 
     fragment.appendChild(clone);
   });
-  
+
   // For current results: prepend (newest first)
   // For history: append (chronological order)
   if (container === elements.resultsGrid) {
@@ -225,15 +230,16 @@ export function addResult(result, container = elements.resultsGrid) {
 
 export function renderHistory(history) {
   elements.historyGrid.innerHTML = "";
-  
+
   // Ensure history is an array and handle gracefully
   const historyArray = Array.isArray(history) ? history : [];
-  
+
   if (historyArray.length === 0) {
-    elements.historyGrid.innerHTML = '<div class="empty-state">No history yet. Start a remix session to see variants.</div>';
+    elements.historyGrid.innerHTML =
+      '<div class="empty-state">No history yet. Start a remix session to see variants.</div>';
     return;
   }
-  
+
   // Render history in chronological order (oldest first)
   historyArray.forEach((item) => addResult(item, elements.historyGrid));
 }
@@ -249,24 +255,24 @@ export function setupApiKeyHandlers(setApiKey, addLog, refreshCreditsUI) {
   }
 
   // Handle save button click
-  elements.saveApiKeyBtn.addEventListener('click', (e) => {
+  elements.saveApiKeyBtn.addEventListener("click", (e) => {
     e.preventDefault(); // Prevent form submission
     const apiKey = elements.apiKeyInput.value.trim();
     if (!apiKey) {
-      addLog('Please enter an API key', 'error');
+      addLog("Please enter an API key", "error");
       return;
     }
-    
+
     setApiKey(apiKey);
-    addLog('API key saved successfully', 'success');
-    
+    addLog("API key saved successfully", "success");
+
     // Auto-refresh credits after saving new API key
     refreshCreditsUI();
   });
 
   // Handle Enter key in input
-  elements.apiKeyInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
+  elements.apiKeyInput.addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
       elements.saveApiKeyBtn.click();
     }
   });

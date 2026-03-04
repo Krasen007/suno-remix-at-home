@@ -151,11 +151,19 @@ def download_remix(audio_url, filename):
 
 
 def save_results(results):
-    """Save results for web interface display."""
-    # Results are now handled via web interface - no file saving needed
-    print(f"[OUTPUT] Results available via web interface")
-    # Return results for potential future web integration
-    return results
+    """Save results to a JSON file."""
+    output_file = "remix_results.json"
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(results, f, indent=2, ensure_ascii=False)
+        print(f"[OUTPUT] Results saved to {output_file}")
+        return results
+    except (OSError, IOError) as e:
+        print(f"[ERROR] Failed to save results to {output_file}: {e}")
+        return results
+    except (TypeError, ValueError) as e:
+        print(f"[ERROR] Failed to serialize results: {e}")
+        return results
 
 
 def main():

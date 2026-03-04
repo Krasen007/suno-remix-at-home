@@ -1,5 +1,5 @@
 // API Module
-import { state, updateHistory, setCredits } from './state.js';
+import { state, updateHistory, setCredits } from "./state.js";
 
 export async function refreshCredits(addLog) {
   try {
@@ -12,17 +12,26 @@ export async function refreshCredits(addLog) {
     });
     if (!res.ok) {
       const errText = await res.text();
-      return { credits: null, error: `Credits error (${res.status}): ${errText}` };
+      return {
+        credits: null,
+        error: `Credits error (${res.status}): ${errText}`,
+      };
     }
     const data = await res.json();
     if (data.success) {
       setCredits(data.credits);
       return { credits: data.credits, error: null };
     } else {
-      return { credits: null, error: `Failed to fetch credits: ${data.message}` };
+      return {
+        credits: null,
+        error: `Failed to fetch credits: ${data.message}`,
+      };
     }
   } catch (e) {
-    return { credits: null, error: `Network error fetching credits: ${e.message}` };
+    return {
+      credits: null,
+      error: `Network error fetching credits: ${e.message}`,
+    };
   }
 }
 
@@ -30,12 +39,24 @@ export async function checkServer() {
   try {
     const res = await fetch("/api/health");
     if (res.ok) {
-      return { status: "connected", text: "Server: Connected", color: "var(--primary)" };
+      return {
+        status: "connected",
+        text: "Server: Connected",
+        color: "var(--primary)",
+      };
     } else {
-      return { status: "error", text: `Server: Error (${res.status})`, color: "var(--danger)" };
+      return {
+        status: "error",
+        text: `Server: Error (${res.status})`,
+        color: "var(--danger)",
+      };
     }
   } catch (e) {
-    return { status: "offline", text: "Server: Offline", color: "var(--danger)" };
+    return {
+      status: "offline",
+      text: "Server: Offline",
+      color: "var(--danger)",
+    };
   }
 }
 
@@ -44,14 +65,16 @@ export async function loadHistory(addLog) {
     const response = await fetch("/api/history");
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Failed to load history: ${response.status} - ${errorText}`);
+      throw new Error(
+        `Failed to load history: ${response.status} - ${errorText}`,
+      );
     }
-    
+
     const serverHistory = await response.json();
-    
+
     // Update state with merged history
     updateHistory(serverHistory);
-    
+
     return { history: state.history, error: null };
   } catch (err) {
     addLog(`Failed to load history: ${err.message}`, "error");
@@ -60,10 +83,11 @@ export async function loadHistory(addLog) {
 }
 
 export async function deleteHistoryItem(timestamp, variantId, addLog) {
-  if (!confirm("Are you sure you want to delete this specific variant?")) return { success: false, error: "User cancelled deletion" };
+  if (!confirm("Are you sure you want to delete this specific variant?"))
+    return { success: false, error: "User cancelled deletion" };
 
   try {
-    const url = `/api/history/${timestamp}${variantId ? '/' + variantId : ''}`;
+    const url = `/api/history/${timestamp}${variantId ? "/" + variantId : ""}`;
     const res = await fetch(url, { method: "DELETE" });
     if (res.ok) {
       addLog("Item deleted from history.", "info");
@@ -72,13 +96,19 @@ export async function deleteHistoryItem(timestamp, variantId, addLog) {
       return { success: false, error: "Failed to delete item" };
     }
   } catch (e) {
-    return { success: false, error: `Network error deleting item: ${e.message}` };
+    return {
+      success: false,
+      error: `Network error deleting item: ${e.message}`,
+    };
   }
 }
 
 export async function uploadToGitHub(file, addLog) {
   // GitHub upload functionality removed - use any public hosting service
-  addLog("GitHub upload removed. Please use any public hosting service (Dropbox, Google Drive, personal website, etc.) and paste the URL directly.", "error");
+  addLog(
+    "GitHub upload removed. Please use any public hosting service (Dropbox, Google Drive, personal website, etc.) and paste the URL directly.",
+    "error",
+  );
   return null;
 }
 
@@ -105,16 +135,19 @@ function parseSSEStream(reader, onLog, onResult, onDone) {
     }
   }
 
-  return async function() {
+  return async function () {
     try {
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
-        
+        if (done) {
+          onDone();
+          break;
+        }
+
         sseBuffer += decoder.decode(value, { stream: true });
         const lines = sseBuffer.split("\n");
         sseBuffer = lines.pop() || "";
-        
+
         for (const line of lines) {
           if (line.trim()) processLine(line);
         }
@@ -126,7 +159,13 @@ function parseSSEStream(reader, onLog, onResult, onDone) {
   };
 }
 
-export async function startRemixSession(tracks, onLog, onResult, onDone, onError) {
+export async function startRemixSession(
+  tracks,
+  onLog,
+  onResult,
+  onDone,
+  onError,
+) {
   try {
     const response = await fetch("/api/remix", {
       method: "POST",
@@ -145,7 +184,7 @@ export async function startRemixSession(tracks, onLog, onResult, onDone, onError
     const reader = response.body.getReader();
     const processStream = parseSSEStream(reader, onLog, onResult, onDone);
     await processStream();
-    
+
     return true;
   } catch (err) {
     onLog(`Connection error: ${err.message}`, "error");
