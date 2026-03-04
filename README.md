@@ -71,31 +71,6 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 - History management with delete functionality
 - Cover art display for generated tracks
 
-### 🛠️ Technical Improvements
-
-#### **Enhanced Error Handling**
-
-- **Consistent API error patterns** - All functions return `{data, error}` objects
-- **Specific error messages** for common issues (invalid API keys, quota exceeded, etc.)
-- **Robust validation** with detailed debugging information
-- **Graceful failure handling** with user-friendly messages
-
-#### **Accessibility Features**
-
-- **Proper label associations** for all form fields
-- **Keyboard navigation support** with focus management
-- **ARIA roles and attributes** for screen readers
-- **Focus trapping** in modal dialogs
-- **Semantic HTML structure** for better accessibility
-
-#### **Code Quality**
-
-- **Standardized error handling** across all API functions
-- **Separated concerns** - Single responsibility per function
-- **Removed redundant code** and unreachable logic
-- **Enhanced validation** with type checking and edge cases
-- **Improved debugging** with comprehensive logging
-
 ### 🔧 API Integration
 
 #### **Suno API Features**
@@ -117,12 +92,9 @@ Visit **[http://localhost:5000](http://localhost:5000)** and start using the web
 
 #### **Audio URL Sources**
 
-Since GitHub upload functionality has been removed, use any public hosting service:
-
 - **Dropbox** - Upload MP3 files and get shareable links
 - **Google Drive** - Upload files and set to public access
 - **Personal websites** - Host files on your own domain
-- **Direct Suno URLs** - Use Suno's temporary URLs directly
 
 #### **URL Format Requirements**
 
@@ -184,26 +156,6 @@ Since GitHub upload functionality has been removed, use any public hosting servi
 - Check browser compatibility with audio formats
 - Try downloading files if streaming doesn't work
 
-### 🔄 Updates & Changelog
-
-#### **Recent Improvements**
-
-- ✅ **Enhanced error handling** with specific API error messages
-- ✅ **Improved accessibility** with proper label associations
-- ✅ **Fixed track validation** and state management
-- ✅ **Added real-time debugging** for better troubleshooting
-- ✅ **Streamlined UI flow** with better user feedback
-- ✅ **Removed GitHub dependency** for simplified deployment
-- ✅ **Enhanced onboarding** with cleaner welcome flow
-
-#### **Technical Debt Resolved**
-
-- Fixed inconsistent API error handling patterns
-- Resolved track state update issues with proper callbacks
-- Improved SSE parsing and result processing
-- Enhanced form validation and accessibility compliance
-- Removed redundant code and unreachable logic paths
-
 ---
 
 ## 📝️ Requirements
@@ -220,7 +172,6 @@ For issues, feature requests, or contributions:
 - Check the troubleshooting section above
 - Review browser console for detailed error information
 - Ensure all URLs are publicly accessible
-- Report API connectivity issues to Suno support
 
 ---
 
@@ -250,17 +201,16 @@ For issues, feature requests, or contributions:
 - **Automatic downloads** protect against expired Suno links (15-day limit)
 - **Browser localStorage** provides persistent history across sessions
 - **No server files** - everything stays on your local machine
-- **Export capability** - your `remixes/` folder contains all downloaded files
 
 ### 🎯 Typical Workflow
 
 1. **Start server**: `python server.py`
 2. **Open browser**: Navigate to localhost:5000
 3. **Enter API key**: First-time setup takes 30 seconds
-4. **Add tracks**: Configure multiple songs in one session
+4. **Add tracks**: Configure multiple songs in one session if needed
 5. **Process**: Click "🎵 Start Remix" and watch real-time progress
 6. **Access results**: Play immediately, download permanently
-7. **History**: All past sessions available in "Past Remixes" tab
+7. **History**: All past sessions available in "Past Remixes" tab for 15 days
 
 ### ⚙️ Advanced Configuration
 
@@ -277,7 +227,7 @@ acoustic folk, storytelling
 
 - **Custom Mode**: Extend/modify existing music
 - **Instrumental**: Remove vocals for karaoke/backing tracks
-- **Model**: V5 for latest quality
+- **Model**: V5 for latest quality, 8 min max length
 
 ---
 
@@ -286,7 +236,6 @@ acoustic folk, storytelling
 ### 📂 Data Storage
 
 - **Browser localStorage**: API keys and history (secure, client-side)
-- **Local files**: `remixes/` folder for permanent MP3 storage
 - **No server persistence**: Stateless design for privacy and performance
 
 ### 🔐 Security Model
